@@ -198,6 +198,7 @@ def analyze_with_claude(reviews_text: str) -> str:
 
 @app.post("/analyze-apify")
 async def analyze_apify(request: ApifyAnalyzeRequest):
+    ...
     """Análise com Apify - até 20 reviews"""
     if not request.hotel_name.strip():
         raise HTTPException(status_code=400, detail="Nome do hotel não pode estar vazio")
