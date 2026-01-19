@@ -11,7 +11,9 @@ app = FastAPI()
 # CORS – MVP simples e estável
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://onesynth-frontend.vercel.app",
+    ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
