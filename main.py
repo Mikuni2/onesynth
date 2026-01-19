@@ -1,5 +1,14 @@
+import os
+import httpx
+from dotenv import load_dotenv
+from pydantic import BaseModel
+from anthropic import Anthropic
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+
+load_dotenv()
+
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
