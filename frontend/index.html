@@ -51,23 +51,17 @@
       padding: 22px;
     }
 
-    /* HEADER (logo + wordmark) */
     .brand{
       display:flex;
       align-items:center;
       gap: 14px;
       margin-bottom: 14px;
     }
-    .brand img{
-      height: 44px;
-      width: auto;
-      display:block;
-    }
+    .brand img{ height: 44px; }
     .brand .name{
       font-size: 28px;
       font-weight: 700;
       margin:0;
-      letter-spacing: .2px;
     }
 
     .subtitle{
@@ -88,38 +82,28 @@
       margin-bottom: 16px;
     }
 
-    label{
-      font-size: 14px;
-      display:block;
-      margin-bottom: 6px;
-    }
+    label{ font-size: 14px; display:block; margin-bottom: 6px; }
 
     input{
       width: 100%;
-      padding: 12px 12px;
+      padding: 12px;
       border-radius: 10px;
       border: 1px solid #cfd6df;
       margin-bottom: 14px;
       font-size: 14px;
-      outline: none;
-    }
-    input:focus{
-      border-color:#7aa7e6;
-      box-shadow: 0 0 0 3px rgba(80,140,220,.15);
     }
 
     button{
       width: 100%;
-      padding: 13px 12px;
+      padding: 13px;
       background: #3fa66a;
       color: white;
       border: none;
       border-radius: 10px;
       font-size: 15px;
-      cursor: pointer;
       font-weight: 700;
+      cursor: pointer;
     }
-    button:disabled{ opacity: .6; cursor:not-allowed; }
 
     .errorBox{
       background: #fdecea;
@@ -131,135 +115,9 @@
       display:none;
     }
 
-    /* REPORT LAYOUT (igual ao mock) */
     .report{
       margin-top: 18px;
       display:none;
-      border-radius: 14px;
-      overflow: hidden;
-      border: 1px solid #e6ebf1;
-      background: #fff;
-    }
-
-    .reportTop{
-      padding: 14px 14px 16px;
-      background: linear-gradient(180deg, #ffffff, #f7f9fc);
-      border-bottom: 1px solid #e6ebf1;
-    }
-
-    .kv{
-      background: #f1f4f8;
-      border-radius: 12px;
-      padding: 14px;
-      border: 1px solid #e0e6ee;
-    }
-    .kvRow{
-      display:flex;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(0,0,0,.06);
-    }
-    .kvRow:last-child{ border-bottom: none; }
-    .kvKey{
-      width: 180px;
-      font-weight: 700;
-      color:#253a55;
-    }
-    .kvVal{ flex: 1; color:#1f2f45; }
-
-    .section{
-      padding: 0;
-      border-top: 1px solid #e6ebf1;
-    }
-
-    .sectionTitle{
-      padding: 10px 14px;
-      color:#fff;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-    .sectionBody{
-      padding: 12px 14px 14px;
-      background: #fbfcfe;
-    }
-
-    .bar-green{ background: linear-gradient(90deg, var(--greenBar), var(--greenBar2)); }
-    .bar-orange{ background: linear-gradient(90deg, var(--orangeBar), var(--orangeBar2)); }
-    .bar-red{ background: linear-gradient(90deg, var(--redBar), var(--redBar2)); }
-    .bar-gray{ background: linear-gradient(90deg, var(--grayBar), var(--grayBar2)); }
-
-    .lead{
-      font-size: 16px;
-      font-weight: 700;
-      color:#1e2f46;
-      margin: 0 0 10px;
-      line-height: 1.35;
-    }
-
-    .warnLine{
-      display:flex;
-      align-items:flex-start;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: #f5f7fb;
-      border: 1px solid #e2e8f2;
-      color:#26364c;
-    }
-    .warnIcon{
-      font-size: 18px;
-      line-height: 1.1;
-    }
-    .warnText{
-      font-size: 14px;
-      line-height: 1.35;
-    }
-    .warnText b{ font-weight: 800; }
-
-    ul{
-      margin: 8px 0 0 0;
-      padding-left: 18px;
-    }
-    li{
-      margin: 6px 0;
-      line-height: 1.35;
-      color:#24364e;
-    }
-    li b{ font-weight: 800; }
-
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      padding: 0 14px 14px;
-      background: #ffffff;
-    }
-    .box{
-      border: 1px solid #e6ebf1;
-      border-radius: 14px;
-      overflow:hidden;
-      background: #fbfcfe;
-    }
-    .boxBody{ padding: 12px 14px 14px; }
-
-    .noteCard{
-      border: 1px solid #e6ebf1;
-      border-radius: 14px;
-      overflow:hidden;
-      background: #fbfcfe;
-    }
-    .noteBody{
-      padding: 12px 14px 14px;
-      color:#2a3a52;
-      line-height: 1.4;
-      display:flex;
-      gap: 10px;
-      align-items:flex-start;
-    }
-    .noteIcon{
-      font-size: 18px;
-      line-height: 1.1;
-      opacity: .85;
     }
 
     .meta{
@@ -267,20 +125,12 @@
       font-size: 12px;
       color: var(--muted);
       text-align: right;
-      padding: 0 4px 0;
     }
 
     .loading{
       color:#555;
       font-style: italic;
       padding: 14px;
-    }
-
-    @media (max-width: 820px){
-      .kvKey{ width: 140px; }
-      .grid2{ grid-template-columns: 1fr; }
-      .brand img{ height: 40px; }
-      .brand .name{ font-size: 24px; }
     }
   </style>
 </head>
@@ -289,7 +139,6 @@
   <div class="page">
     <div class="container">
       <div class="brand">
-        <!-- coloca Logo.png na mesma pasta do index.html -->
         <img src="Logo.png" alt="OneSynth logo" />
         <h1 class="name">OneSynth</h1>
       </div>
@@ -308,188 +157,19 @@
       <button id="btn" onclick="analisar()">Gerar Conclusão</button>
 
       <div id="error" class="errorBox"></div>
-
-      <!-- REPORT -->
       <div id="report" class="report"></div>
-
       <div id="meta" class="meta"></div>
     </div>
   </div>
 
   <script>
-    const API_BASE = "https://onesynth-1.onrender.com";
+    const API_BASE = "https://onesynth1.onrender.com";
 
-    // Mantém o TEXTO; só o encaixa em caixas.
     function escapeHtml(str) {
       return str
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;");
-    }
-
-    function isProbablyHtml(s){
-      return /<\/?[a-z][\s\S]*>/i.test(s);
-    }
-
-    // tenta identificar secções SEM alterar conteúdo:
-    // - separa por títulos conhecidos (linhas)
-    // - listas por bullets (-, •, ▪)
-    // - avisos por "⚠️"
-    function parseReportToLayout(rawText, meta){
-      const text = (rawText || "").replace(/\r/g, "").trim();
-      const lines = text.split("\n").map(l => l.trim()).filter(l => l.length);
-
-      // helper: extrai valor "Chave: Valor"
-      const kv = {};
-      for (const l of lines.slice(0, 12)) {
-        const m = l.match(/^([A-Za-zÀ-ÿ0-9\sçÇ]+)\s*:\s*(.+)$/);
-        if (m) kv[m[1].trim()] = m[2].trim();
-      }
-
-      // fallback (se backend não incluir as linhas do topo)
-      const hotel = kv["Hotel"] || (meta?.hotel_name || "");
-      const loc   = kv["Localização"] || (meta?.location || "");
-      const fonte = kv["Fonte das opiniões"] || (meta?.data_source || "Reviews públicas (Google Maps)");
-      const vol   = kv["Volume analisado"] || (meta?.reviews_used ? `~${meta.reviews_used} reviews` : "");
-
-      // Identificadores (linhas exactas, como no layout)
-      const T = {
-        adequacao: "Avaliação global de adequação",
-        fortes: "Pontos fortes recorrentes (padrões consistentes)",
-        fracos: "Pontos fracos recorrentes",
-        nao: "Não recomendado se o Cliente:",
-        alertas: "Alertas pontuais",
-        nota: "Nota metodológica"
-      };
-
-      // corta o texto por títulos
-      function sliceSection(title){
-        const idx = lines.findIndex(l => l.toLowerCase() === title.toLowerCase());
-        if (idx === -1) return null;
-
-        // vai até ao próximo título conhecido
-        const nextIdx = lines.findIndex((l, i) => i > idx && Object.values(T).some(t => l.toLowerCase() === t.toLowerCase()));
-        const end = nextIdx === -1 ? lines.length : nextIdx;
-        const body = lines.slice(idx + 1, end);
-        return { idx, body };
-      }
-
-      function renderBody(bodyLines){
-        // separa lead + warning + bullets + paragrafos sem mexer no texto
-        let html = "";
-        const bullets = [];
-        const paras = [];
-        const warns = [];
-
-        for (const l of bodyLines) {
-          if (/^[-•▪]\s+/.test(l)) bullets.push(l.replace(/^[-•▪]\s+/, ""));
-          else if (l.startsWith("⚠️")) warns.push(l.replace(/^⚠️\s*/, ""));
-          else paras.push(l);
-        }
-
-        // primeiro parágrafo como lead, se existir
-        if (paras.length) {
-          html += `<p class="lead">${escapeHtml(paras[0])}</p>`;
-          for (const p of paras.slice(1)) {
-            html += `<div style="margin-top:8px; line-height:1.4;">${escapeHtml(p)}</div>`;
-          }
-        }
-
-        for (const w of warns) {
-          // tenta manter o "Principal risco identificado:" em bold se vier assim no texto
-          const safe = escapeHtml(w).replace(/(Principal risco identificado\s*:)/i, "<b>$1</b>");
-          html += `
-            <div class="warnLine" style="margin-top:10px;">
-              <div class="warnIcon">⚠️</div>
-              <div class="warnText">${safe}</div>
-            </div>`;
-        }
-
-        if (bullets.length) {
-          html += "<ul>";
-          for (const b of bullets) {
-            // mantém negritos simples se o backend já enviar com **...** (opcional)
-            let safe = escapeHtml(b);
-            safe = safe.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-            html += `<li>${safe}</li>`;
-          }
-          html += "</ul>";
-        }
-
-        // se não encontrou nada estruturável, mostra tudo como texto preservando quebras
-        if (!html.trim()) {
-          html = `<div style="white-space:pre-wrap; line-height:1.5;">${escapeHtml(bodyLines.join("\n"))}</div>`;
-        }
-        return html;
-      }
-
-      const secAdeq = sliceSection(T.adequacao);
-      const secFortes = sliceSection(T.fortes);
-      const secFracos = sliceSection(T.fracos);
-      const secNao = sliceSection(T.nao);
-      const secAlertas = sliceSection(T.alertas);
-      const secNota = sliceSection(T.nota);
-
-      // NOTA: se alguma secção não existir no texto, não inventamos — apenas omitimos.
-      return `
-        <div class="reportTop">
-          <div class="kv">
-            <div class="kvRow"><div class="kvKey">Hotel:</div><div class="kvVal">${escapeHtml(hotel)}</div></div>
-            <div class="kvRow"><div class="kvKey">Localização:</div><div class="kvVal">${escapeHtml(loc)}</div></div>
-            <div class="kvRow"><div class="kvKey">Fonte das opiniões:</div><div class="kvVal">${escapeHtml(fonte)}</div></div>
-            <div class="kvRow"><div class="kvKey">Volume analisado:</div><div class="kvVal">${escapeHtml(vol)}</div></div>
-          </div>
-        </div>
-
-        ${secAdeq ? `
-          <div class="section">
-            <div class="sectionTitle bar-green">${escapeHtml(T.adequacao)}</div>
-            <div class="sectionBody">${renderBody(secAdeq.body)}</div>
-          </div>
-        ` : ""}
-
-        ${secFortes ? `
-          <div class="section">
-            <div class="sectionTitle bar-green">${escapeHtml(T.fortes)}</div>
-            <div class="sectionBody">${renderBody(secFortes.body)}</div>
-          </div>
-        ` : ""}
-
-        ${(secFracos || secNao) ? `
-          <div class="grid2">
-            ${secFracos ? `
-              <div class="box">
-                <div class="sectionTitle bar-orange">${escapeHtml(T.fracos)}</div>
-                <div class="boxBody">${renderBody(secFracos.body)}</div>
-              </div>
-            ` : ""}
-
-            ${secNao ? `
-              <div class="box">
-                <div class="sectionTitle bar-red">${escapeHtml(T.nao)}</div>
-                <div class="boxBody">${renderBody(secNao.body)}</div>
-              </div>
-            ` : ""}
-
-            ${secAlertas ? `
-              <div class="box">
-                <div class="sectionTitle bar-orange">${escapeHtml(T.alertas)}</div>
-                <div class="boxBody">${renderBody(secAlertas.body)}</div>
-              </div>
-            ` : ""}
-
-            ${secNota ? `
-              <div class="noteCard">
-                <div class="sectionTitle bar-gray">${escapeHtml(T.nota)}</div>
-                <div class="noteBody">
-                  <div class="noteIcon">ℹ️</div>
-                  <div>${renderBody(secNota.body)}</div>
-                </div>
-              </div>
-            ` : ""}
-          </div>
-        ` : ""}
-      `;
     }
 
     async function analisar() {
@@ -502,13 +182,10 @@
       const metaDiv = document.getElementById("meta");
 
       errorDiv.style.display = "none";
-      errorDiv.innerHTML = "";
       report.style.display = "none";
-      report.innerHTML = "";
-      metaDiv.innerText = "";
 
       if (!hotelName) {
-        errorDiv.innerHTML = "❌ Por favor, insere o nome do hotel.";
+        errorDiv.innerText = "❌ Por favor, insere o nome do hotel.";
         errorDiv.style.display = "block";
         return;
       }
@@ -516,48 +193,24 @@
       btn.disabled = true;
       btn.innerText = "A analisar…";
 
-      report.innerHTML = "<div class='loading'>⏳ A processar… aguarda cerca de 20 segundos.</div>";
+      report.innerHTML = "<div class='loading'>⏳ A processar…</div>";
       report.style.display = "block";
 
       try {
-        const response = await fefetch(`${API_BASE}/ROTA_CORRETA`, {
+        const response = await fetch(`${API_BASE}/analyze-apify`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ hotel_name: hotelName })
         });
 
-        if (!response.ok) {
-          let detail = "Erro ao processar.";
-          try {
-            const err = await response.json();
-            detail = err.detail || detail;
-          } catch {}
-          throw new Error(detail);
-        }
+        if (!response.ok) throw new Error("Erro no backend");
 
         const data = await response.json();
-
-        const raw = data.result_markdown || "";
-
-        // Se o backend já devolver HTML estruturado, usamos direto (sem alterar texto).
-        if (isProbablyHtml(raw)) {
-          report.innerHTML = raw;
-        } else {
-          report.innerHTML = parseReportToLayout(raw, data.meta || {});
-        }
-
-        // meta pequena no fim (não mexe no texto principal)
-        if (data.meta) {
-          const parts = [];
-          if (data.meta.reviews_used) parts.push(`${data.meta.reviews_used} reviews analisadas`);
-          if (data.meta.google_rating) parts.push(`Rating médio: ${data.meta.google_rating}`);
-          metaDiv.innerText = parts.join(" • ");
-        }
-
+        report.innerHTML = `<pre>${escapeHtml(data.result_markdown || "")}</pre>`;
         report.style.display = "block";
 
       } catch (err) {
-        errorDiv.innerHTML = `❌ ${err.message}<br><small>Verifica se o backend está ativo em ${API_BASE}</small>`;
+        errorDiv.innerHTML = `❌ ${err.message}<br><small>Backend: ${API_BASE}</small>`;
         errorDiv.style.display = "block";
         report.style.display = "none";
       } finally {
@@ -565,10 +218,6 @@
         btn.innerText = "Gerar Conclusão";
       }
     }
-
-    document.getElementById("hotelName").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") analisar();
-    });
   </script>
 </body>
 </html>
