@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OneSynth</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: auto;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #4f9cff, #2b6fd3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      background: linear-gradient(135deg, #1f3c6d, #2b6fd3);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .info {
+      background: #eef5ff;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 14px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #3fa66a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .result {
+      margin-top: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .loading {
+      color: #555;
+      font-style: italic;
+    }
+
+    .errorBox {
+      background: #fdecea;
+      color: #611a15;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    .meta {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">O</div>
+      <h1>OneSynth</h1>
+    </div>
+
+    <div class="subtitle">
+      Síntese isenta de reviews de hóspedes para apoiar a recomendação hoteleira
+    </div>
+
+    <div class="info">
+      ℹ️ Sistema otimizado: 5 reviews por análise (mais rápido e económico)
+    </div>
+
+    <label for="hotelName">Nome do Hotel, Cidade:</label>
+    <input id="hotelName" type="text" placeholder="ex: Hotel CR7, Funchal" />
+
+    <button id="btn" onclick="analisar()">Gerar Conclusão</button>
+
+    <div id="error" class="errorBox" style="display:none;"></div>
+
+    <div id="result" class="result" style="display:none;"></div>
+    <div id="meta" class="meta"></div>
+  </div>
+
+  <script>
+    const API_BASE = "https://onesynth.onrender.com";
+
+    async function analisar() {
+      const hotelName = document.getElementById("hotelName").value.trim();
+      const btn = document.getElementById("btn");
+      const resultDiv = document.getElementById("result");
+      const errorDiv = document.getElementById("error");
+      const metaDiv = document.getElementById("meta");
+
+      errorDiv.style.display = "none";
+      resultDiv.style.display = "none";
+      metaDiv.innerText = "";
+
+      if (!hotelName) {
+        errorDiv.innerHTML = "❌ Por favor, insere o nome do hotel.";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "A analisar…";
+
+      resultDiv.innerHTML = "<div class='loading'>⏳ A processar… aguarda cerca de 20 segundos.</div>";
+      resultDiv.style.display = "block";
+
+      try {
+        const response = await fetch(`${API_BASE}/analyze-apify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ hotel_name: hotelName })
+        });
+
+        if (!response.ok) {
+          let detail = "Erro ao processar.";
+          try {
+            const err = await response.json();
+            detail = err.detail || detail;
+          } catch {}
+          throw new Error(detail);
+        }
+
+        const data = await response.json();
+
+        resultDiv.innerHTML = data.analysis || "Sem conteúdo devolvido.";
+
+        if (data.meta) {
+          const parts = [];
+          if (data.meta.reviews_used)
+            parts.push(`${data.meta.reviews_used} reviews analisadas`);
+          if (data.meta.google_rating)
+            parts.push(`Rating médio: ${data.meta.google_rating}`);
+          metaDiv.innerText = parts.join(" • ");
+        }
+
+      } catch (err) {
+        errorDiv.innerHTML = `❌ ${err.message}<br><small>Verifica se o backend está ativo em ${API_BASE}</small>`;
+        errorDiv.style.display = "block";
+        resultDiv.style.display = "none";
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Gerar Conclusão";
+      }
+    }
+
+    document.getElementById("hotelName").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") analisar();
+    });
+  </script>
+</body>
+</html>
+
