@@ -1,23 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import os
-from anthropic import Anthropic
-from dotenv import load_dotenv
-import httpx
 
-app = FastAPI()
-
-# CORS – MVP simples e estável
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://onesynth-frontend.vercel.app",
     ],
+    allow_origin_regex=r"^https://onesynth-frontend-[a-z0-9-]+-mikunis-projects\.vercel\.app$",
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
-)
 
 load_dotenv()
 
