@@ -13,7 +13,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://onesynth-frontend.vercel.app",
+        "https://onesynth-fronten.vercel.app",
     ],
     allow_origin_regex=r"^https://onesynth-frontend-[a-z0-9-]+-mikunis-projects\.vercel\.app$",
     allow_credentials=False,
