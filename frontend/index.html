@@ -149,10 +149,11 @@
   </div>
 
   <script>
-    const API_BASE = "https://onesynth.onrender.com";
+    const API_BASE = "https://onesynth-1.onrender.com";
 
     async function analisar() {
-      const hotelName = document.getElementById("hotelName").value.trim();
+      let hotelName = document.getElementById("hotelName").value.trim();
+hotelName = hotelName.replace(/^hotel\s+/i, "");
       const btn = document.getElementById("btn");
       const resultDiv = document.getElementById("result");
       const errorDiv = document.getElementById("error");
@@ -192,7 +193,8 @@
 
         const data = await response.json();
 
-        resultDiv.innerHTML = data.analysis || "Sem conteúdo devolvido.";
+        resultDiv.innerHTML = data.result_markdown || "Sem conteúdo devolvido.";
+
 
         if (data.meta) {
           const parts = [];
