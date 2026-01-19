@@ -1,5 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://teu-frontend.vercel.app",
+        # (opcional) para testes: "null" quando abres via file://
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 from pydantic import BaseModel
 import os
 from anthropic import Anthropic
@@ -16,7 +31,6 @@ print("ANTHROPIC_API_KEY loaded:", bool(os.getenv("ANTHROPIC_API_KEY")))
 with open("prompt_v1.txt", "r", encoding="utf-8") as f:
     PROMPT_BASE = f.read()
 
-app = FastAPI()
 
 # CORS
 app.add_middleware(
