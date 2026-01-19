@@ -15,16 +15,12 @@ app = FastAPI()
 # - opcional: localhost (se testares local)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://onesynth-frontend.vercel.app",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
-    allow_origin_regex=r"^https://onesynth-frontend-.*\.vercel\.app$",
-    allow_credentials=False,   # ✅ não usas cookies/sessão no fetch
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 load_dotenv()
 print("ANTHROPIC_API_KEY loaded:", bool(os.getenv("ANTHROPIC_API_KEY")))
