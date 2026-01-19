@@ -520,7 +520,7 @@
       report.style.display = "block";
 
       try {
-        const response = await fetch(`${API_BASE}/analyze-apify`, {
+        const response = await fefetch(`${API_BASE}/ROTA_CORRETA`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ hotel_name: hotelName })
