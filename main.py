@@ -1,36 +1,41 @@
 import os
-from dotenv import load_dotenv
+from typing import Dict, Any, List
 
 import httpx
+from dotenv import load_dotenv
 from anthropic import Anthropic
-from pydantic import BaseModel
+
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+
+
+load_dotenv()
 
 app = FastAPI()
 
-# ✅ ESSENCIAL: CORS para o browser não bloquear o fetch do Vercel
-# (Simples e sem stress: permitir tudo. Depois, se quiseres, apertamos.)
+# --- CORS (permitir Vercel do teu frontend) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+    ],
+    # qualquer domínio que comece por onesynth-frontend e termine em .vercel.app
+    allow_origin_regex=r"^https://onesynth-frontend.*\.vercel\.app$",
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-load_dotenv()
-
+# --- Prompt (não alterar o ficheiro, apenas ler) ---
 with open("prompt_v1.txt", "r", encoding="utf-8") as f:
     PROMPT_BASE = f.read()
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
-
-if not ANTHROPIC_API_KEY:
-    raise RuntimeError("Missing ANTHROPIC_API_KEY")
-if not GOOGLE_PLACES_API_KEY:
-    raise RuntimeError("Missing GOOGLE_PLACES_API_KEY")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")
 
 anthropic_client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -40,23 +45,38 @@ class ApifyAnalyzeRequest(BaseModel):
 
 
 @app.get("/health")
-async def health():
+def health():
     return {"ok": True}
 
 
-async def fetch_reviews_google_places(hotel_name: str) -> dict:
+@app.get("/")
+def root():
+    return {"message": "Resumo Honesto de Reviews API - MVP (até 20 reviews)"}
+
+
+async def fetch_reviews_google_places(hotel_name: str) -> Dict[str, Any]:
+    if not GOOGLE_PLACES_API_KEY:
+        raise HTTPException(status_code=500, detail="GOOGLE_PLACES_API_KEY em falta no servidor")
+
     async with httpx.AsyncClient(timeout=30.0) as client:
         search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-        search_params = {"query": hotel_name, "type": "lodging", "key": GOOGLE_PLACES_API_KEY}
+        search_params = {
+            "query": hotel_name,
+            "type": "lodging",
+            "key": GOOGLE_PLACES_API_KEY,
+        }
 
         r = await client.get(search_url, params=search_params)
         r.raise_for_status()
         data = r.json()
 
-        if not data.get("results"):
-            raise HTTPException(status_code=404, detail="Hotel não encontrado")
+        results: List[Dict[str, Any]] = data.get("results") or []
+        if not results:
+            raise HTTPException(status_code=404, detail="Hotel não encontrado (Google Places)")
 
-        place_id = data["results"][0]["place_id"]
+        place_id = results[0].get("place_id")
+        if not place_id:
+            raise HTTPException(status_code=404, detail="Hotel sem place_id (Google Places)")
 
         details_url = "https://maps.googleapis.com/maps/api/place/details/json"
         details_params = {
@@ -69,22 +89,24 @@ async def fetch_reviews_google_places(hotel_name: str) -> dict:
         r.raise_for_status()
         details = r.json()
 
-        result = details.get("result", {})
-        reviews = result.get("reviews", [])
+        result = details.get("result") or {}
+        reviews = result.get("reviews") or []
 
         if not reviews:
-            raise HTTPException(status_code=404, detail="Sem reviews")
+            raise HTTPException(status_code=404, detail="Sem reviews (Google Places)")
 
         return {
             "reviews": reviews,
-            "reviews_with_text_count": len([rv for rv in reviews if rv.get("text")]),
+            "reviews_with_text_count": len([rv for rv in reviews if (rv.get("text") or "").strip()]),
             "rating": result.get("rating"),
             "reviews_count": result.get("user_ratings_total"),
         }
 
 
 def analyze_with_claude(reviews_text: str) -> str:
-    # ✅ PROMPT NÃO ALTERADO — apenas concatenado como já estava
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY em falta no servidor")
+
     content = PROMPT_BASE + "\n\nREVIEWS:\n" + reviews_text
 
     msg = anthropic_client.messages.create(
@@ -97,10 +119,11 @@ def analyze_with_claude(reviews_text: str) -> str:
 
 @app.post("/analyze-apify")
 async def analyze_apify(request: ApifyAnalyzeRequest):
-    if not request.hotel_name.strip():
+    hotel = (request.hotel_name or "").strip()
+    if not hotel:
         raise HTTPException(status_code=400, detail="Nome do hotel vazio")
 
-    google_data = await fetch_reviews_google_places(request.hotel_name)
+    google_data = await fetch_reviews_google_places(hotel)
 
     reviews_text = ""
     for i, rv in enumerate(google_data["reviews"], 1):
@@ -120,8 +143,3 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
             "total_ratings": google_data["reviews_count"],
         },
     }
-
-
-@app.get("/")
-async def root():
-    return {"message": "Resumo Honesto de Reviews API - MVP (até 20 reviews)"}
