@@ -22,8 +22,9 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "http://localhost:5500",
         "http://127.0.0.1:5500",
+        "https://onesynth-fronten-abzx.vercel.app",  # Domínio específico do Vercel
     ],
-    # qualquer domínio que comece por onesynth-frontend e termine em .vercel.app
+    # qualquer domínio que comece por onesynth-fronten e termine em .vercel.app
     allow_origin_regex=r"^https://onesynth-fronten.*\.vercel\.app$",
     allow_credentials=False,
     allow_methods=["*"],
