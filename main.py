@@ -1,33 +1,36 @@
 import os
-import httpx
 from dotenv import load_dotenv
-from pydantic import BaseModel
+
+import httpx
 from anthropic import Anthropic
+from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-load_dotenv()
-
 app = FastAPI()
 
-# CORS (corrigido)
+# ✅ ESSENCIAL: CORS para o browser não bloquear o fetch do Vercel
+# (Simples e sem stress: permitir tudo. Depois, se quiseres, apertamos.)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://onesynth-frontend.vercel.app",
-        "https://onesynth-frontend-git-main-mikunis-projects.vercel.app",
-    ],
-    allow_origin_regex=r"^https://onesynth-frontend-[a-z0-9-]+-mikunis-projects\.vercel\.app$",
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+load_dotenv()
 
 with open("prompt_v1.txt", "r", encoding="utf-8") as f:
     PROMPT_BASE = f.read()
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY")
+
+if not ANTHROPIC_API_KEY:
+    raise RuntimeError("Missing ANTHROPIC_API_KEY")
+if not GOOGLE_PLACES_API_KEY:
+    raise RuntimeError("Missing GOOGLE_PLACES_API_KEY")
 
 anthropic_client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -36,14 +39,15 @@ class ApifyAnalyzeRequest(BaseModel):
     hotel_name: str
 
 
+@app.get("/health")
+async def health():
+    return {"ok": True}
+
+
 async def fetch_reviews_google_places(hotel_name: str) -> dict:
     async with httpx.AsyncClient(timeout=30.0) as client:
         search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-        search_params = {
-            "query": hotel_name,
-            "type": "lodging",
-            "key": GOOGLE_PLACES_API_KEY,
-        }
+        search_params = {"query": hotel_name, "type": "lodging", "key": GOOGLE_PLACES_API_KEY}
 
         r = await client.get(search_url, params=search_params)
         r.raise_for_status()
@@ -80,6 +84,7 @@ async def fetch_reviews_google_places(hotel_name: str) -> dict:
 
 
 def analyze_with_claude(reviews_text: str) -> str:
+    # ✅ PROMPT NÃO ALTERADO — apenas concatenado como já estava
     content = PROMPT_BASE + "\n\nREVIEWS:\n" + reviews_text
 
     msg = anthropic_client.messages.create(
@@ -90,11 +95,6 @@ def analyze_with_claude(reviews_text: str) -> str:
     return msg.content[0].text
 
 
-@app.get("/health")
-async def health():
-    return {"ok": True}
-
-
 @app.post("/analyze-apify")
 async def analyze_apify(request: ApifyAnalyzeRequest):
     if not request.hotel_name.strip():
@@ -103,10 +103,10 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
     google_data = await fetch_reviews_google_places(request.hotel_name)
 
     reviews_text = ""
-    for i, r in enumerate(google_data["reviews"], 1):
+    for i, rv in enumerate(google_data["reviews"], 1):
         reviews_text += (
-            f"Review {i} ({r.get('rating', 0)}/5 - {r.get('author_name','Anónimo')}):\n"
-            f"{r.get('text','')}\n\n"
+            f"Review {i} ({rv.get('rating', 0)}/5 - {rv.get('author_name','Anónimo')}):\n"
+            f"{rv.get('text','')}\n\n"
         )
 
     result_markdown = analyze_with_claude(reviews_text)
@@ -120,7 +120,7 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
             "total_ratings": google_data["reviews_count"],
         },
     }
-       
+
 
 @app.get("/")
 async def root():

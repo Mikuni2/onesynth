@@ -6,171 +6,195 @@
   <title>OneSynth</title>
 
   <style>
-    body{
-      font-family: Arial, sans-serif;
-      background:#f4f6f8;
-      margin:0;
-      padding:40px 16px;
-      color:#132238;
+    :root{
+      --bg:#f4f6f8;
+      --card:#ffffff;
+      --ink:#132238;
+      --muted:#5b6776;
+
+      --blue1:#1f3c6d;
+      --blue2:#2b6fd3;
+
+      --shadow: 0 8px 22px rgba(0,0,0,.08);
+      --radius: 14px;
     }
 
-    .card{
-      max-width:520px;
-      margin:0 auto;
-      background:#fff;
-      padding:24px;
-      border-radius:14px;
-      box-shadow:0 8px 22px rgba(0,0,0,.08);
+    body{
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      margin:0;
+      padding: 28px 14px;
+      color: var(--ink);
+    }
+
+    .page{ max-width: 860px; margin: 0 auto; }
+
+    .container{
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px;
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:12px;
-      margin-bottom:12px;
+      gap: 14px;
+      margin-bottom: 14px;
     }
-
-    .brand img{ height:42px; }
-
-    h1{ margin:0; font-size:26px; }
+    .brand img{ height: 44px; }
+    .brand .name{ font-size: 28px; font-weight: 700; margin:0; }
 
     .subtitle{
-      background:#2b6fd3;
-      color:#fff;
-      padding:12px 14px;
-      border-radius:10px;
-      margin:12px 0 16px;
-      font-size:15px;
+      background: linear-gradient(135deg, var(--blue1), var(--blue2));
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 16px;
+      margin: 10px 0 16px;
     }
 
     .info{
-      background:#eef5ff;
-      padding:10px 12px;
-      border-radius:10px;
-      font-size:13px;
-      margin-bottom:16px;
+      background: #eef5ff;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #24486f;
+      margin-bottom: 16px;
     }
 
-    label{ font-size:14px; }
+    label{ font-size: 14px; display:block; margin-bottom: 6px; }
 
     input{
-      width:100%;
-      padding:12px;
-      margin:8px 0 14px;
-      border-radius:10px;
-      border:1px solid #cfd6df;
-      font-size:14px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #cfd6df;
+      margin-bottom: 14px;
+      font-size: 14px;
     }
 
     button{
-      width:100%;
-      padding:13px;
-      background:#3fa66a;
-      color:#fff;
-      border:none;
-      border-radius:10px;
-      font-size:15px;
-      font-weight:700;
-      cursor:pointer;
+      width: 100%;
+      padding: 13px;
+      background: #3fa66a;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
-    button:disabled{ opacity:.6; }
-
-    .error{
-      background:#fdecea;
-      color:#611a15;
-      padding:10px 12px;
-      border-radius:10px;
-      margin-top:14px;
+    .errorBox{
+      background: #fdecea;
+      color: #611a15;
+      padding: 10px 12px;
+      border-radius: 10px;
+      margin-top: 14px;
+      font-size: 13px;
       display:none;
-      font-size:13px;
     }
 
     .report{
-      margin-top:18px;
+      margin-top: 18px;
       display:none;
-      white-space:pre-wrap;
-      font-size:14px;
-      line-height:1.45;
+      white-space: pre-wrap;
     }
 
     .loading{
-      font-style:italic;
       color:#555;
+      font-style: italic;
+      padding: 14px;
     }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="brand">
-      <img src="Logo.png" alt="OneSynth logo">
-      <h1>OneSynth</h1>
+  <div class="page">
+    <div class="container">
+      <div class="brand">
+        <img src="Logo.png" alt="OneSynth logo" />
+        <h1 class="name">OneSynth</h1>
+      </div>
+
+      <div class="subtitle">
+        Síntese isenta de reviews de hóspedes para apoiar a recomendação hoteleira
+      </div>
+
+      <div class="info">
+        ℹ️ Sistema otimizado: 5 reviews por análise (mais rápido e económico)
+      </div>
+
+      <label for="hotelName">Nome do Hotel, Cidade:</label>
+      <input id="hotelName" type="text" placeholder="ex: Hotel CR7, Funchal" />
+
+      <button id="btn" onclick="analisar()">Gerar Conclusão</button>
+
+      <div id="error" class="errorBox"></div>
+      <div id="report" class="report"></div>
     </div>
-
-    <div class="subtitle">
-      Síntese isenta de reviews de hóspedes para apoiar a recomendação hoteleira
-    </div>
-
-    <div class="info">
-      ℹ️ Sistema otimizado: 5 reviews por análise (mais rápido e económico)
-    </div>
-
-    <label>Nome do Hotel, Cidade</label>
-    <input id="hotel" placeholder="ex: Hotel CR7, Funchal">
-
-    <button id="btn" onclick="analisar()">Gerar Conclusão</button>
-
-    <div id="error" class="error"></div>
-    <div id="report" class="report"></div>
   </div>
 
-<script>
- const API_BASE = "https://onesynth-1.onrender.com";
+  <script>
+    // ✅ BACKEND CERTO (Render)
+    const API_BASE = "https://onesynth-1.onrender.com";
 
-  async function analisar(){
-    const hotel = document.getElementById("hotel").value.trim();
-    const btn = document.getElementById("btn");
-    const error = document.getElementById("error");
-    const report = document.getElementById("report");
-
-    error.style.display = "none";
-    report.style.display = "none";
-
-    if(!hotel){
-      error.innerText = "❌ Insere o nome do hotel.";
-      error.style.display = "block";
-      return;
+    function escapeHtml(str) {
+      return (str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
     }
 
-    btn.disabled = true;
-    btn.innerText = "A analisar…";
+    async function analisar() {
+      let hotelName = document.getElementById("hotelName").value.trim();
+      hotelName = hotelName.replace(/^hotel\s+/i, "");
 
-    report.innerHTML = "<div class='loading'>⏳ A processar…</div>";
-    report.style.display = "block";
+      const btn = document.getElementById("btn");
+      const report = document.getElementById("report");
+      const errorDiv = document.getElementById("error");
 
-    try{
-      const res = await fetch(`${API_BASE}/analyze-apify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hotel_name: hotel })
-      });
-
-      if(!res.ok) throw new Error("Erro no backend");
-
-      const data = await res.json();
-      report.innerText = data.result_markdown || "Sem conteúdo.";
-
-    }catch(err){
-      error.innerHTML = `❌ ${err.message}<br><small>${API_BASE}</small>`;
-      error.style.display = "block";
+      errorDiv.style.display = "none";
       report.style.display = "none";
-    }finally{
-      btn.disabled = false;
-      btn.innerText = "Gerar Conclusão";
-    }
-  }
-</script>
 
+      if (!hotelName) {
+        errorDiv.innerText = "❌ Por favor, insere o nome do hotel.";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "A analisar…";
+
+      report.innerHTML = "<div class='loading'>⏳ A processar…</div>";
+      report.style.display = "block";
+
+      try {
+        const response = await fetch(`${API_BASE}/analyze-apify`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ hotel_name: hotelName })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const msg = data?.detail ? String(data.detail) : "Erro no backend";
+          throw new Error(msg);
+        }
+
+        report.innerHTML = `<pre>${escapeHtml(data.result_markdown)}</pre>`;
+        report.style.display = "block";
+
+      } catch (err) {
+        errorDiv.innerHTML = `❌ ${err.message}<br><small>Backend: ${API_BASE}</small>`;
+        errorDiv.style.display = "block";
+        report.style.display = "none";
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Gerar Conclusão";
+      }
+    }
+  </script>
 </body>
 </html>
