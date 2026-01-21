@@ -14,18 +14,10 @@ load_dotenv()
 
 app = FastAPI()
 
-# --- CORS (permitir Vercel do teu frontend) ---
+# --- CORS (permitir TODOS os domínios - TEMPORÁRIO PARA TESTE) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "https://onesynth-fronten-abzx.vercel.app",  # Domínio específico do Vercel
-    ],
-    # qualquer domínio que comece por onesynth-fronten e termine em .vercel.app
-    allow_origin_regex=r"^https://onesynth-fronten.*\.vercel\.app$",
+    allow_origins=["*"],  # TEMPORÁRIO: permite tudo para testar
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
