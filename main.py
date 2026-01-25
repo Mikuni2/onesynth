@@ -189,14 +189,19 @@ async def fetch_reviews_google_places(hotel_name: str) -> Dict[str, Any]:
         if not results:
             raise HTTPException(status_code=404, detail="Hotel não encontrado (Google Places)")
 
-        place_id = results[0].get("place_id")
+        first_result = results[0]
+        place_id = first_result.get("place_id")
         if not place_id:
             raise HTTPException(status_code=404, detail="Hotel sem place_id (Google Places)")
+
+        # Guardar nome e endereço do hotel encontrado
+        found_hotel_name = first_result.get("name", "")
+        formatted_address = first_result.get("formatted_address", "")
 
         details_url = "https://maps.googleapis.com/maps/api/place/details/json"
         details_params = {
             "place_id": place_id,
-            "fields": "reviews,rating,user_ratings_total",
+            "fields": "reviews,rating,user_ratings_total,photos,name,formatted_address",
             "key": GOOGLE_PLACES_API_KEY,
         }
 
@@ -210,11 +215,28 @@ async def fetch_reviews_google_places(hotel_name: str) -> Dict[str, Any]:
         if not reviews:
             raise HTTPException(status_code=404, detail="Sem reviews (Google Places)")
 
+        # Obter URL da foto do hotel
+        photo_url = None
+        photos = result.get("photos") or []
+        if photos:
+            photo_reference = photos[0].get("photo_reference")
+            if photo_reference:
+                photo_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference={photo_reference}&key={GOOGLE_PLACES_API_KEY}"
+
+        # Usar nome/endereço dos detalhes se disponível
+        if result.get("name"):
+            found_hotel_name = result.get("name")
+        if result.get("formatted_address"):
+            formatted_address = result.get("formatted_address")
+
         return {
             "reviews": reviews,
             "reviews_with_text_count": len([rv for rv in reviews if (rv.get("text") or "").strip()]),
             "rating": result.get("rating"),
             "reviews_count": result.get("user_ratings_total"),
+            "found_hotel_name": found_hotel_name,
+            "formatted_address": formatted_address,
+            "photo_url": photo_url,
         }
 
 
@@ -256,5 +278,8 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
             "reviews_with_text": google_data["reviews_with_text_count"],
             "google_rating": google_data["rating"],
             "total_ratings": google_data["reviews_count"],
+            "found_hotel_name": google_data.get("found_hotel_name", ""),
+            "formatted_address": google_data.get("formatted_address", ""),
+            "photo_url": google_data.get("photo_url"),
         },
     }
