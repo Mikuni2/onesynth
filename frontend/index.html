@@ -15,9 +15,25 @@
       --blue1:#1f3c6d;
       --blue2:#2b6fd3;
 
+      --green-bg:#e8f5e9;
+      --green-border:#4caf50;
+      --green-title:#2e7d32;
+
+      --yellow-bg:#fffde7;
+      --yellow-border:#fbc02d;
+      --yellow-title:#f57f17;
+
+      --red-bg:#ffebee;
+      --red-border:#e53935;
+      --red-title:#c62828;
+
+      --gray-bg:#f5f5f5;
+
       --shadow: 0 8px 22px rgba(0,0,0,.08);
       --radius: 14px;
     }
+
+    *{ box-sizing: border-box; }
 
     body{
       font-family: Arial, sans-serif;
@@ -39,29 +55,10 @@
     .brand{
       display:flex;
       align-items:center;
-      gap: 14px;
-      margin-bottom: 14px;
+      justify-content: center;
+      margin-bottom: 20px;
     }
-    .brand img{ height: 44px; }
-    .brand .name{ font-size: 28px; font-weight: 700; margin:0; }
-
-    .subtitle{
-      background: linear-gradient(135deg, var(--blue1), var(--blue2));
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 16px;
-      margin: 10px 0 16px;
-    }
-
-    .info{
-      background: #eef5ff;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      color: #24486f;
-      margin-bottom: 16px;
-    }
+    .brand img{ height: 70px; }
 
     label{ font-size: 14px; display:block; margin-bottom: 6px; }
 
@@ -86,6 +83,8 @@
       cursor: pointer;
     }
 
+    button:hover{ background: #369959; }
+
     .errorBox{
       background: #fdecea;
       color: #611a15;
@@ -99,13 +98,124 @@
     .report{
       margin-top: 18px;
       display:none;
-      white-space: pre-wrap;
     }
 
     .loading{
       color:#555;
       font-style: italic;
       padding: 14px;
+      text-align: center;
+    }
+
+    /* === ESTILOS DO RESULTADO === */
+    .result-container{
+      position: relative;
+      padding-bottom: 30px;
+    }
+
+    .hotel-info{
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .hotel-info strong{ color: var(--blue1); }
+
+    .section{
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .section-title{
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid currentColor;
+    }
+
+    .section-assessment{
+      background: var(--gray-bg);
+      border-left: 4px solid var(--blue1);
+    }
+    .section-assessment .section-title{ color: var(--blue1); }
+
+    .section-strong{
+      background: var(--green-bg);
+      border-left: 4px solid var(--green-border);
+    }
+    .section-strong .section-title{ color: var(--green-title); }
+
+    .section-weak{
+      background: var(--yellow-bg);
+      border-left: 4px solid var(--yellow-border);
+    }
+    .section-weak .section-title{ color: var(--yellow-title); }
+
+    .section-not-rec{
+      background: var(--red-bg);
+      border-left: 4px solid var(--red-border);
+    }
+    .section-not-rec .section-title{ color: var(--red-title); }
+
+    .section-profile{
+      background: #e3f2fd;
+      border-left: 4px solid #1976d2;
+    }
+    .section-profile .section-title{ color: #1565c0; }
+
+    .section-recommended{
+      background: #e8f5e9;
+      border-left: 4px solid #66bb6a;
+    }
+    .section-recommended .section-title{ color: #2e7d32; }
+
+    .section-alerts{
+      background: #fff3e0;
+      border-left: 4px solid #ff9800;
+    }
+    .section-alerts .section-title{ color: #e65100; }
+
+    .section-note{
+      background: var(--gray-bg);
+      border-left: 4px solid #78909c;
+      font-size: 13px;
+      font-style: italic;
+    }
+    .section-note .section-title{ color: #546e7a; font-style: normal; }
+
+    .two-columns{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 600px){
+      .two-columns{ grid-template-columns: 1fr; }
+    }
+
+    .reviews-count{
+      position: absolute;
+      bottom: 5px;
+      left: 10px;
+      font-size: 11px;
+      color: #999;
+    }
+
+    .section ul{
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .section li{
+      margin-bottom: 4px;
     }
   </style>
 </head>
@@ -114,22 +224,14 @@
   <div class="page">
     <div class="container">
       <div class="brand">
-        <img src="Logo.png" alt="OneSynth logo" />
-        <h1 class="name">OneSynth</h1>
+        <img src="Logo.png" alt="OneSynth" />
       </div>
 
-      <div class="subtitle">
-        Síntese isenta de reviews de hóspedes para apoiar a recomendação hoteleira
+      <div id="searchForm">
+        <label for="hotelName">Nome do Hotel, Cidade:</label>
+        <input id="hotelName" type="text" placeholder="ex: Hotel CR7, Funchal" />
+        <button id="btn" onclick="analisar()">Gerar Conclusão</button>
       </div>
-
-      <div class="info">
-        ℹ️ Sistema otimizado: 5 reviews por análise (mais rápido e económico)
-      </div>
-
-      <label for="hotelName">Nome do Hotel, Cidade:</label>
-      <input id="hotelName" type="text" placeholder="ex: Hotel CR7, Funchal" />
-
-      <button id="btn" onclick="analisar()">Gerar Conclusão</button>
 
       <div id="error" class="errorBox"></div>
       <div id="report" class="report"></div>
@@ -137,14 +239,205 @@
   </div>
 
   <script>
-    // ✅ BACKEND CERTO (Render)
-    const API_BASE = "https://onesynth-1.onrender.com"; 
+    const API_BASE = "https://onesynth-1.onrender.com";
 
     function escapeHtml(str) {
       return (str || "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;");
+    }
+
+    function parseMarkdownToSections(markdown) {
+      const sections = {
+        hotel: '',
+        localizacao: '',
+        fonte: '',
+        avaliacao: '',
+        pontosFortes: '',
+        pontosFracos: '',
+        perfil: '',
+        recomendado: '',
+        naoRecomendado: '',
+        alertas: '',
+        nota: ''
+      };
+
+      const lines = markdown.split('\n');
+      let currentSection = '';
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        const lineLower = line.toLowerCase();
+
+        // Identificação
+        if (lineLower.startsWith('- hotel:') || lineLower.startsWith('hotel:')) {
+          sections.hotel = line.replace(/^-?\s*hotel:\s*/i, '');
+          continue;
+        }
+        if (lineLower.includes('localiza')) {
+          const match = line.match(/localiza[çc][ãa]o:\s*(.+)/i);
+          if (match) {
+            sections.localizacao = match[1];
+            continue;
+          }
+        }
+        if (lineLower.startsWith('- fonte')) {
+          sections.fonte = line.replace(/^-?\s*fonte[^:]*:\s*/i, '');
+          continue;
+        }
+        if (lineLower.startsWith('- volume')) {
+          continue; // Ignorar volume
+        }
+
+        // Secções principais
+        if (lineLower.includes('avaliação global') || lineLower.includes('avaliacao global')) {
+          currentSection = 'avaliacao';
+          continue;
+        }
+        if (lineLower.includes('pontos fortes')) {
+          currentSection = 'pontosFortes';
+          continue;
+        }
+        if (lineLower.includes('pontos fracos')) {
+          currentSection = 'pontosFracos';
+          continue;
+        }
+        if (lineLower.includes('aspetos dependentes') || lineLower.includes('aspectos dependentes')) {
+          currentSection = 'perfil';
+          continue;
+        }
+        if ((lineLower.includes('recomendado para') || lineLower.match(/^recomendado\s+para/)) && !lineLower.includes('não') && !lineLower.includes('nao')) {
+          currentSection = 'recomendado';
+          continue;
+        }
+        if (lineLower.includes('não recomendado') || lineLower.includes('nao recomendado')) {
+          currentSection = 'naoRecomendado';
+          continue;
+        }
+        if (lineLower.includes('alertas pontuais')) {
+          currentSection = 'alertas';
+          continue;
+        }
+        if (lineLower.includes('nota metodológica') || lineLower.includes('nota metodologica')) {
+          currentSection = 'nota';
+          continue;
+        }
+        if (lineLower.includes('identificação') || lineLower.includes('identificacao') || lineLower.includes('síntese profissional') || lineLower.includes('sintese profissional')) {
+          currentSection = '';
+          continue;
+        }
+
+        // Adicionar conteúdo à secção atual
+        if (currentSection && line) {
+          sections[currentSection] += line + '\n';
+        }
+      }
+
+      return sections;
+    }
+
+    function formatContent(text) {
+      if (!text.trim()) return '';
+
+      const lines = text.trim().split('\n');
+      let html = '<ul>';
+
+      for (const line of lines) {
+        let cleanLine = line.replace(/^[-•*]\s*/, '').trim();
+        if (cleanLine) {
+          html += `<li>${escapeHtml(cleanLine)}</li>`;
+        }
+      }
+
+      html += '</ul>';
+      return html;
+    }
+
+    function formatParagraph(text) {
+      if (!text.trim()) return '';
+      return text.trim().split('\n').map(l => escapeHtml(l.trim())).filter(l => l).join('<br>');
+    }
+
+    function renderResult(markdown, meta) {
+      const sections = parseMarkdownToSections(markdown);
+      const reviewCount = meta.received_reviews || '';
+
+      let html = `
+        <div class="result-container">
+          <div class="hotel-info">
+            <strong>Hotel:</strong> ${escapeHtml(sections.hotel)}<br>
+            <strong>Localização:</strong> ${escapeHtml(sections.localizacao)}<br>
+            <strong>Fonte das opiniões:</strong> ${escapeHtml(sections.fonte) || 'Reviews públicas (Google Maps)'}
+          </div>
+
+          ${sections.avaliacao.trim() ? `
+          <div class="section section-assessment">
+            <div class="section-title">Avaliação global de adequação</div>
+            <div>${formatParagraph(sections.avaliacao)}</div>
+          </div>
+          ` : ''}
+
+          ${sections.pontosFortes.trim() ? `
+          <div class="section section-strong">
+            <div class="section-title">Pontos fortes recorrentes (padrões consistentes)</div>
+            ${formatContent(sections.pontosFortes)}
+          </div>
+          ` : ''}
+
+          <div class="two-columns">
+            ${sections.pontosFracos.trim() ? `
+            <div class="section section-weak">
+              <div class="section-title">Pontos fracos recorrentes</div>
+              ${formatContent(sections.pontosFracos)}
+            </div>
+            ` : ''}
+            ${sections.naoRecomendado.trim() ? `
+            <div class="section section-not-rec">
+              <div class="section-title">Não recomendado se o cliente:</div>
+              ${formatContent(sections.naoRecomendado)}
+            </div>
+            ` : ''}
+          </div>
+
+          ${sections.perfil.trim() ? `
+          <div class="section section-profile">
+            <div class="section-title">Aspetos dependentes do perfil do cliente</div>
+            ${formatContent(sections.perfil)}
+          </div>
+          ` : ''}
+
+          ${sections.recomendado.trim() ? `
+          <div class="section section-recommended">
+            <div class="section-title">Recomendado para</div>
+            ${formatContent(sections.recomendado)}
+          </div>
+          ` : ''}
+
+          ${sections.alertas.trim() ? `
+          <div class="section section-alerts">
+            <div class="section-title">Alertas pontuais</div>
+            ${formatContent(sections.alertas)}
+          </div>
+          ` : ''}
+
+          ${sections.nota.trim() ? `
+          <div class="section section-note">
+            <div class="section-title">Nota metodológica</div>
+            <div>${formatParagraph(sections.nota)}</div>
+          </div>
+          ` : `
+          <div class="section section-note">
+            <div class="section-title">Nota metodológica</div>
+            <div>Esta síntese baseia-se exclusivamente na análise de padrões recorrentes em opiniões públicas de hóspedes, com o objetivo de apoiar a recomendação profissional e alinhar expectativas do cliente.</div>
+          </div>
+          `}
+
+          ${reviewCount ? `<div class="reviews-count">${reviewCount}</div>` : ''}
+        </div>
+      `;
+
+      return html;
     }
 
     async function analisar() {
@@ -159,15 +452,15 @@
       report.style.display = "none";
 
       if (!hotelName) {
-        errorDiv.innerText = "❌ Por favor, insere o nome do hotel.";
+        errorDiv.innerText = "Por favor, insere o nome do hotel.";
         errorDiv.style.display = "block";
         return;
       }
 
       btn.disabled = true;
-      btn.innerText = "A analisar…";
+      btn.innerText = "A analisar...";
 
-      report.innerHTML = "<div class='loading'>⏳ A processar…</div>";
+      report.innerHTML = "<div class='loading'>A processar...</div>";
       report.style.display = "block";
 
       try {
@@ -183,11 +476,11 @@
           throw new Error(msg);
         }
 
-        report.innerHTML = `<pre>${escapeHtml(data.result_markdown)}</pre>`;
+        report.innerHTML = renderResult(data.result_markdown, data.meta || {});
         report.style.display = "block";
 
       } catch (err) {
-        errorDiv.innerHTML = `❌ ${err.message}<br><small>Backend: ${API_BASE}</small>`;
+        errorDiv.innerHTML = `Erro: ${err.message}<br><small>Backend: ${API_BASE}</small>`;
         errorDiv.style.display = "block";
         report.style.display = "none";
       } finally {
