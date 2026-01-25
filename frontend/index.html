@@ -218,8 +218,8 @@
     }
 
     .hotel-photo{
-      width: 140px;
-      height: 140px;
+      width: 180px;
+      height: 180px;
       border-radius: var(--radius-sm);
       object-fit: cover;
       flex-shrink: 0;
@@ -228,15 +228,15 @@
     }
 
     .hotel-photo-placeholder{
-      width: 140px;
-      height: 140px;
+      width: 180px;
+      height: 180px;
       border-radius: var(--radius-sm);
       background: rgba(255,255,255,0.1);
       border: 2px solid rgba(255,255,255,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 48px;
+      font-size: 56px;
       flex-shrink: 0;
     }
 
@@ -351,17 +351,15 @@
     @media (max-width: 640px){
       .two-columns{ grid-template-columns: 1fr; }
       .hotel-header{ flex-direction: column; align-items: center; text-align: center; }
-      .hotel-photo, .hotel-photo-placeholder{ width: 120px; height: 120px; }
+      .hotel-photo, .hotel-photo-placeholder{ width: 150px; height: 150px; }
       .hotel-meta{ justify-content: center; flex-wrap: wrap; }
     }
 
     .reviews-count{
-      text-align: center;
-      font-size: 12px;
+      text-align: left;
+      font-size: 11px;
       color: var(--muted);
       margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid #e2e8f0;
     }
 
     .section ul{
@@ -402,7 +400,7 @@
       <div class="brand">
         <img src="Logo.png" alt="OneSynth" />
       </div>
-      <p class="subtitle">Ferramenta de apoio a agentes de viagens</p>
+      <p class="subtitle">Síntese profissional de Reviews - Apoio à Recomendação Hoteleira</p>
 
       <div class="search-box">
         <label for="hotelName">Nome do Hotel e Cidade</label>
@@ -561,7 +559,6 @@
               <div class="hotel-location">📍 ${escapeHtml(location)}</div>
               <div class="hotel-meta">
                 ${googleRating ? `<span>⭐ ${googleRating}/5 Google</span>` : ''}
-                ${totalRatings ? `<span>📝 ${totalRatings} avaliações</span>` : ''}
               </div>
             </div>
           </div>
@@ -628,7 +625,7 @@
           </div>
           `}
 
-          ${reviewCount ? `<div class="reviews-count">Análise baseada em ${reviewCount} reviews do Google Maps</div>` : ''}
+          ${reviewCount ? `<div class="reviews-count">${reviewCount}</div>` : ''}
         </div>
       `;
 
