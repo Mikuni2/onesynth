@@ -127,6 +127,7 @@ Fim do prompt"""
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")
+OUTSCRAPER_API_KEY = os.getenv("OUTSCRAPER_API_KEY", "")
 
 anthropic_client = Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -224,6 +225,92 @@ async def fetch_reviews_google_places(hotel_name: str) -> Dict[str, Any]:
         }
 
 
+async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict[str, Any]]:
+    """
+    Busca reviews do Outscraper - mais recentes e com texto detalhado.
+    Usa polling para aguardar resultados assíncronos.
+    """
+    if not OUTSCRAPER_API_KEY:
+        return []
+
+    try:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            url = "https://api.app.outscraper.com/maps/reviews-v3"
+            params = {
+                "query": hotel_name,
+                "reviewsLimit": 15,
+                "sort": "newest",
+                "ignoreEmpty": True,
+            }
+            headers = {
+                "X-API-KEY": OUTSCRAPER_API_KEY,
+            }
+
+            # Fazer request inicial
+            response = await client.get(url, params=params, headers=headers)
+
+            # Se retornar 202, precisamos fazer polling
+            if response.status_code == 202:
+                data = response.json()
+                results_url = data.get("results_location")
+                if not results_url:
+                    return []
+
+                # Polling - aguardar até 60 segundos
+                import asyncio
+                for _ in range(12):  # 12 tentativas x 5 segundos = 60 seg
+                    await asyncio.sleep(5)
+                    poll_response = await client.get(results_url, headers=headers)
+                    if poll_response.status_code == 200:
+                        poll_data = poll_response.json()
+                        if poll_data.get("status") == "Success" and poll_data.get("data"):
+                            data = poll_data
+                            break
+                else:
+                    return []  # Timeout
+            elif response.status_code == 200:
+                data = response.json()
+            else:
+                print(f"Outscraper erro: {response.status_code} - {response.text[:200]}")
+                return []
+
+            # Processar resultados
+            if not data.get("data") or len(data["data"]) == 0:
+                return []
+
+            place_data = data["data"][0]
+            if not isinstance(place_data, dict):
+                return []
+
+            reviews_list = place_data.get("reviews_data") or []
+
+            # Filtrar reviews com texto substancial
+            reviews_with_text = [
+                rv for rv in reviews_list
+                if rv.get("review_text") and len(rv.get("review_text", "").strip()) > 50
+            ]
+
+            # Ordenar por tamanho do texto (mais detalhadas primeiro)
+            reviews_with_text.sort(key=lambda x: len(x.get("review_text", "")), reverse=True)
+
+            # Converter para formato padronizado
+            formatted_reviews = []
+            for rv in reviews_with_text[:limit]:
+                formatted_reviews.append({
+                    "rating": rv.get("review_rating", 0),
+                    "text": rv.get("review_text", ""),
+                    "author_name": rv.get("author_title", "Anónimo"),
+                    "time": rv.get("review_datetime_utc", ""),
+                    "source": "Outscraper"
+                })
+
+            return formatted_reviews
+
+    except Exception as e:
+        print(f"Erro Outscraper: {e}")
+        return []
+
+
 def analyze_with_claude(reviews_text: str) -> str:
     if not ANTHROPIC_API_KEY:
         raise HTTPException(status_code=500, detail="ANTHROPIC_API_KEY em falta no servidor")
@@ -244,21 +331,43 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
     if not hotel:
         raise HTTPException(status_code=400, detail="Nome do hotel vazio")
 
+    # Buscar reviews de ambas as fontes em paralelo
     google_data = await fetch_reviews_google_places(hotel)
+    outscraper_reviews = await fetch_reviews_outscraper(hotel, limit=2)
 
+    # Combinar reviews: 5 do Google Places + 5 do Outscraper
     reviews_text = ""
-    for i, rv in enumerate(google_data["reviews"], 1):
-        reviews_text += (
-            f"Review {i} ({rv.get('rating', 0)}/5 - {rv.get('author_name','Anónimo')}):\n"
-            f"{rv.get('text','')}\n\n"
-        )
+    review_count = 0
+
+    # Google Places reviews (até 5)
+    google_reviews = google_data["reviews"][:5]
+    for rv in google_reviews:
+        text = (rv.get("text") or "").strip()
+        if text:
+            review_count += 1
+            reviews_text += (
+                f"Review {review_count} ({rv.get('rating', 0)}/5 - {rv.get('author_name','Anónimo')} - Google):\n"
+                f"{text}\n\n"
+            )
+
+    # Outscraper reviews (até 5)
+    for rv in outscraper_reviews:
+        text = (rv.get("text") or "").strip()
+        if text:
+            review_count += 1
+            reviews_text += (
+                f"Review {review_count} ({rv.get('rating', 0)}/5 - {rv.get('author_name','Anónimo')} - Outscraper):\n"
+                f"{text}\n\n"
+            )
 
     result_markdown = analyze_with_claude(reviews_text)
 
     return {
         "result_markdown": result_markdown,
         "meta": {
-            "received_reviews": len(google_data["reviews"]),
+            "received_reviews": review_count,
+            "google_reviews": len(google_reviews),
+            "outscraper_reviews": len(outscraper_reviews),
             "reviews_with_text": google_data["reviews_with_text_count"],
             "google_rating": google_data["rating"],
             "total_ratings": google_data["reviews_count"],
