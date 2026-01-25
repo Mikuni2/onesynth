@@ -3,408 +3,531 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OneSynth - Análise de Reviews</title>
+  <title>OneSynth - Apoio à Recomendação Hoteleira</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
-      --card:#ffffff;
-      --ink:#1a2b3c;
-      --muted:#64748b;
+    :root {
+      --bg: #0f172a;
+      --bg-elevated: #1e293b;
+      --bg-card: #1e293b;
+      --bg-input: #0f172a;
 
-      --primary:#1e5a8a;
-      --primary-light:#2d7ab8;
-      --primary-dark:#154163;
+      --ink: #f1f5f9;
+      --ink-secondary: #cbd5e1;
+      --muted: #64748b;
+      --border: #334155;
 
-      --green-bg:#ecfdf5;
-      --green-border:#10b981;
-      --green-title:#059669;
+      --accent: #38bdf8;
+      --accent-hover: #7dd3fc;
+      --accent-subtle: rgba(56, 189, 248, 0.1);
 
-      --yellow-bg:#fffbeb;
-      --yellow-border:#f59e0b;
-      --yellow-title:#d97706;
+      --success-bg: rgba(34, 197, 94, 0.1);
+      --success-border: #22c55e;
+      --success-text: #4ade80;
 
-      --red-bg:#fef2f2;
-      --red-border:#ef4444;
-      --red-title:#dc2626;
+      --warning-bg: rgba(234, 179, 8, 0.1);
+      --warning-border: #eab308;
+      --warning-text: #fde047;
 
-      --gray-bg:#f8fafc;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --danger-border: #ef4444;
+      --danger-text: #f87171;
 
-      --shadow: 0 10px 40px rgba(0,0,0,.1);
-      --shadow-sm: 0 4px 12px rgba(0,0,0,.05);
-      --radius: 16px;
-      --radius-sm: 12px;
+      --info-bg: rgba(56, 189, 248, 0.1);
+      --info-border: #38bdf8;
+      --info-text: #7dd3fc;
+
+      --neutral-bg: rgba(100, 116, 139, 0.1);
+      --neutral-border: #475569;
+      --neutral-text: #94a3b8;
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.4), 0 2px 4px -2px rgba(0,0,0,0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5), 0 4px 6px -4px rgba(0,0,0,0.4);
+
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
     }
 
-    *{ box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    body{
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--bg);
+      color: var(--ink);
+      line-height: 1.6;
       min-height: 100vh;
-      padding: 32px 16px;
-      color: var(--ink);
     }
 
-    .page{ max-width: 900px; margin: 0 auto; }
-
-    .container{
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 32px;
+    /* === HERO SECTION === */
+    .hero {
       position: relative;
+      height: 200px;
       overflow: hidden;
+      background: var(--bg);
     }
 
-    .container::before{
-      content: '';
+    .hero-image {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.25;
     }
 
-    .brand{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 28px;
-    }
-    .brand img{
-      height: 80px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,.1));
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15,23,42,0.4) 0%, rgba(15,23,42,0.95) 100%);
     }
 
-    .subtitle{
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px;
       text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-      margin-top: -20px;
-      margin-bottom: 28px;
     }
 
-    .search-box{
-      background: var(--gray-bg);
-      border-radius: var(--radius-sm);
-      padding: 24px;
-      margin-bottom: 20px;
+    .hero-logo {
+      height: 64px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
     }
 
-    label{
+    .hero-tagline {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 400;
+      color: var(--ink-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    /* === MAIN CONTENT === */
+    .main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+      margin-top: -24px;
+      position: relative;
+      z-index: 20;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 32px;
+      border: 1px solid var(--border);
+    }
+
+    /* === SEARCH FORM === */
+    .search-section {
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
       display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
       margin-bottom: 8px;
-      color: var(--ink);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    input{
+    input {
       width: 100%;
       padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      border: 2px solid #e2e8f0;
       font-size: 15px;
       font-family: inherit;
-      transition: all 0.2s ease;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--ink);
+      transition: all 0.15s ease;
     }
 
-    input:focus{
+    input:focus {
       outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(30, 90, 138, 0.1);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-subtle);
     }
 
-    input::placeholder{
-      color: #94a3b8;
+    input::placeholder {
+      color: var(--muted);
     }
 
-    button{
+    button {
       width: 100%;
       padding: 14px 24px;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-      color: white;
-      border: none;
-      border-radius: var(--radius-sm);
       font-size: 15px;
       font-weight: 600;
       font-family: inherit;
+      color: var(--bg);
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s ease;
-      margin-top: 12px;
+      transition: all 0.15s ease;
     }
 
-    button:hover:not(:disabled){
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(30, 90, 138, 0.3);
+    button:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: var(--shadow);
     }
 
-    button:disabled{
-      opacity: 0.7;
+    button:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
-    .errorBox{
-      background: var(--red-bg);
-      color: var(--red-title);
-      padding: 20px;
-      border-radius: var(--radius-sm);
-      margin-top: 20px;
-      font-size: 14px;
+    /* === MESSAGES === */
+    .errorBox {
       display: none;
-      border: 1px solid var(--red-border);
+      padding: 24px;
+      border-radius: var(--radius);
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
       text-align: center;
+      margin-top: 24px;
     }
 
-    .error-image{
-      font-size: 64px;
+    .error-image {
+      font-size: 40px;
       margin-bottom: 12px;
+      opacity: 0.8;
     }
 
-    .error-title{
+    .error-title {
+      font-size: 15px;
       font-weight: 600;
-      font-size: 16px;
+      color: var(--danger-text);
       margin-bottom: 8px;
     }
 
-    .error-message{
-      color: #666;
+    .error-message {
       font-size: 13px;
+      color: var(--ink-secondary);
+      line-height: 1.5;
     }
 
-    .report{
-      margin-top: 24px;
+    .searched-vs-found {
       display: none;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      font-size: 13px;
+      color: var(--warning-text);
+      margin-bottom: 20px;
     }
 
-    .loading{
-      color: var(--muted);
-      padding: 40px;
+    .searched-vs-found strong {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    /* === REPORT === */
+    .report {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .loading {
+      padding: 48px 24px;
       text-align: center;
+      color: var(--ink-secondary);
     }
 
-    .loading-spinner{
-      width: 40px;
-      height: 40px;
-      border: 3px solid #e2e8f0;
-      border-top-color: var(--primary);
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 1s linear infinite;
       margin: 0 auto 16px;
+      animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin{
-      to{ transform: rotate(360deg); }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
-    /* === RESULTADO === */
-    .result-container{
-      position: relative;
+    .loading-text {
+      font-size: 14px;
+      margin-bottom: 4px;
     }
 
-    .hotel-header{
+    .loading-subtext {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* === RESULT === */
+    .result-container {
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hotel-header {
       display: flex;
       gap: 20px;
-      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-      border-radius: var(--radius-sm);
       padding: 20px;
-      margin-bottom: 20px;
-      color: white;
+      background: var(--bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
     }
 
-    .hotel-photo{
-      width: 180px;
-      height: 180px;
+    .hotel-photo {
+      width: 130px;
+      height: 130px;
       border-radius: var(--radius-sm);
       object-fit: cover;
       flex-shrink: 0;
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.2);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
     }
 
-    .hotel-photo-placeholder{
-      width: 180px;
-      height: 180px;
+    .hotel-photo-placeholder {
+      width: 130px;
+      height: 130px;
       border-radius: var(--radius-sm);
-      background: rgba(255,255,255,0.1);
-      border: 2px solid rgba(255,255,255,0.2);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 56px;
+      font-size: 40px;
       flex-shrink: 0;
     }
 
-    .hotel-details{
+    .hotel-details {
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
 
-    .hotel-name{
-      font-size: 22px;
+    .hotel-name {
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+      color: var(--ink);
     }
 
-    .hotel-location{
+    .hotel-location {
       font-size: 14px;
-      opacity: 0.9;
+      color: var(--ink-secondary);
       margin-bottom: 12px;
+      font-weight: 400;
     }
 
-    .hotel-meta{
+    .hotel-meta {
       display: flex;
       gap: 16px;
       font-size: 13px;
-      opacity: 0.85;
+      color: var(--accent);
     }
 
-    .hotel-meta span{
+    .hotel-meta span {
       display: flex;
       align-items: center;
       gap: 4px;
     }
 
-    .section{
-      border-radius: var(--radius-sm);
-      padding: 18px;
+    /* === SECTIONS === */
+    .section {
+      padding: 20px;
+      border-radius: var(--radius);
       margin-bottom: 16px;
       font-size: 14px;
       line-height: 1.7;
-      box-shadow: var(--shadow-sm);
+      border: 1px solid transparent;
     }
 
-    .section-title{
+    .section-title {
+      font-size: 11px;
       font-weight: 700;
-      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid currentColor;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid currentColor;
+      opacity: 0.9;
     }
 
-    .section-assessment{
-      background: var(--gray-bg);
-      border-left: 4px solid var(--primary);
+    .section ul {
+      margin: 0;
+      padding-left: 18px;
     }
-    .section-assessment .section-title{ color: var(--primary); }
 
-    .section-strong{
-      background: var(--green-bg);
-      border-left: 4px solid var(--green-border);
+    .section li {
+      margin-bottom: 6px;
+      color: var(--ink-secondary);
     }
-    .section-strong .section-title{ color: var(--green-title); }
 
-    .section-weak{
-      background: var(--yellow-bg);
-      border-left: 4px solid var(--yellow-border);
+    .section p, .section > div:not(.section-title) {
+      color: var(--ink-secondary);
     }
-    .section-weak .section-title{ color: var(--yellow-title); }
 
-    .section-not-rec{
-      background: var(--red-bg);
-      border-left: 4px solid var(--red-border);
+    /* Section variants */
+    .section-assessment {
+      background: var(--neutral-bg);
+      border-color: var(--neutral-border);
     }
-    .section-not-rec .section-title{ color: var(--red-title); }
+    .section-assessment .section-title { color: var(--accent); }
 
-    .section-profile{
-      background: #eff6ff;
-      border-left: 4px solid #3b82f6;
+    .section-strong {
+      background: var(--success-bg);
+      border-color: var(--success-border);
     }
-    .section-profile .section-title{ color: #2563eb; }
+    .section-strong .section-title { color: var(--success-text); }
 
-    .section-recommended{
-      background: var(--green-bg);
-      border-left: 4px solid #22c55e;
+    .section-weak {
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
     }
-    .section-recommended .section-title{ color: var(--green-title); }
+    .section-weak .section-title { color: var(--warning-text); }
 
-    .section-alerts{
-      background: #fff7ed;
-      border-left: 4px solid #f97316;
+    .section-not-rec {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
     }
-    .section-alerts .section-title{ color: #ea580c; }
+    .section-not-rec .section-title { color: var(--danger-text); }
 
-    .section-note{
-      background: var(--gray-bg);
-      border-left: 4px solid #94a3b8;
-      font-size: 13px;
-      font-style: italic;
+    .section-profile {
+      background: var(--info-bg);
+      border-color: var(--info-border);
     }
-    .section-note .section-title{ color: #64748b; font-style: normal; }
+    .section-profile .section-title { color: var(--info-text); }
 
-    .two-columns{
+    .section-recommended {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+    }
+    .section-recommended .section-title { color: var(--success-text); }
+
+    .section-alerts {
+      background: rgba(251, 146, 60, 0.1);
+      border-color: #fb923c;
+    }
+    .section-alerts .section-title { color: #fdba74; }
+
+    .section-note {
+      background: var(--neutral-bg);
+      border-color: var(--border);
+    }
+    .section-note .section-title {
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .section-note > div:not(.section-title) {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .two-columns {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
 
-    @media (max-width: 640px){
-      .two-columns{ grid-template-columns: 1fr; }
-      .hotel-header{ flex-direction: column; align-items: center; text-align: center; }
-      .hotel-photo, .hotel-photo-placeholder{ width: 150px; height: 150px; }
-      .hotel-meta{ justify-content: center; flex-wrap: wrap; }
-    }
-
-    .reviews-count{
-      text-align: left;
+    .reviews-count {
       font-size: 11px;
       color: var(--muted);
       margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
     }
 
-    .section ul{
-      margin: 0;
-      padding-left: 20px;
-    }
-
-    .section li{
-      margin-bottom: 6px;
-    }
-
-    .searched-vs-found{
-      background: #fef3c7;
-      color: #92400e;
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 16px;
-      font-size: 13px;
-      display: none;
-    }
-
-    .searched-vs-found strong{
-      color: #78350f;
-    }
-
-    footer{
+    /* === FOOTER === */
+    footer {
       text-align: center;
-      margin-top: 24px;
-      font-size: 12px;
+      padding: 24px;
+      font-size: 11px;
       color: var(--muted);
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 640px) {
+      .hero { height: 160px; }
+      .hero-content { padding: 28px 20px; }
+      .hero-logo { height: 52px; }
+      .hero-tagline { font-size: 13px; }
+
+      .main { padding: 0 16px 32px; margin-top: -16px; }
+      .card { padding: 24px 20px; }
+
+      .two-columns { grid-template-columns: 1fr; }
+
+      .hotel-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 16px;
+      }
+      .hotel-photo, .hotel-photo-placeholder {
+        width: 110px;
+        height: 110px;
+      }
+      .hotel-meta {
+        justify-content: center;
+        flex-wrap: wrap;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="page">
-    <div class="container">
-      <div class="brand">
-        <img src="Logo.png" alt="OneSynth" />
-      </div>
-      <p class="subtitle">Síntese profissional de Reviews - Apoio à Recomendação Hoteleira</p>
+  <!-- Hero Section -->
+  <header class="hero">
+    <img
+      src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80"
+      alt=""
+      class="hero-image"
+      loading="eager"
+    />
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <img src="Logo.png" alt="OneSynth" class="hero-logo" onerror="this.style.display='none'" />
+      <p class="hero-tagline">Apoio profissional à recomendação hoteleira</p>
+    </div>
+  </header>
 
-      <div class="search-box">
-        <label for="hotelName">Nome do Hotel e Cidade</label>
-        <input id="hotelName" type="text" placeholder="Ex: Hotel CR7, Funchal" />
+  <!-- Main Content -->
+  <main class="main">
+    <div class="card">
+      <div class="search-section">
+        <div class="form-group">
+          <label for="hotelName">Nome do Hotel e Cidade</label>
+          <input
+            id="hotelName"
+            type="text"
+            placeholder="Ex: Hotel CR7, Funchal"
+            autocomplete="off"
+          />
+        </div>
         <button id="btn" onclick="analisar()">Gerar Conclusão</button>
       </div>
 
@@ -412,11 +535,11 @@
       <div id="error" class="errorBox"></div>
       <div id="report" class="report"></div>
     </div>
+  </main>
 
-    <footer>
-      OneSynth &copy; 2025 - Ferramenta profissional de síntese de reviews
-    </footer>
-  </div>
+  <footer>
+    OneSynth &copy; 2025
+  </footer>
 
   <script>
     const API_BASE = "http://127.0.0.1:8000";
@@ -469,7 +592,7 @@
           continue;
         }
 
-        if (lineLower.includes('avaliação global') || lineLower.includes('avaliacao global')) {
+        if (lineLower.includes('avalia') && lineLower.includes('global')) {
           currentSection = 'avaliacao';
           continue;
         }
@@ -565,14 +688,14 @@
 
           ${sections.avaliacao.trim() ? `
           <div class="section section-assessment">
-            <div class="section-title">📊 Avaliação global de adequação</div>
+            <div class="section-title">Avaliação Global</div>
             <div>${formatParagraph(sections.avaliacao)}</div>
           </div>
           ` : ''}
 
           ${sections.pontosFortes.trim() ? `
           <div class="section section-strong">
-            <div class="section-title">✓ Pontos fortes recorrentes</div>
+            <div class="section-title">Pontos Fortes</div>
             ${formatContent(sections.pontosFortes)}
           </div>
           ` : ''}
@@ -580,13 +703,13 @@
           <div class="two-columns">
             ${sections.pontosFracos.trim() ? `
             <div class="section section-weak">
-              <div class="section-title">⚠ Pontos fracos recorrentes</div>
+              <div class="section-title">Pontos Fracos</div>
               ${formatContent(sections.pontosFracos)}
             </div>
             ` : ''}
             ${sections.naoRecomendado.trim() ? `
             <div class="section section-not-rec">
-              <div class="section-title">✗ Não recomendado se:</div>
+              <div class="section-title">Não Recomendado Se</div>
               ${formatContent(sections.naoRecomendado)}
             </div>
             ` : ''}
@@ -594,33 +717,33 @@
 
           ${sections.perfil.trim() ? `
           <div class="section section-profile">
-            <div class="section-title">👤 Aspetos dependentes do perfil</div>
+            <div class="section-title">Depende do Perfil</div>
             ${formatContent(sections.perfil)}
           </div>
           ` : ''}
 
           ${sections.recomendado.trim() ? `
           <div class="section section-recommended">
-            <div class="section-title">✓ Recomendado para</div>
+            <div class="section-title">Recomendado Para</div>
             ${formatContent(sections.recomendado)}
           </div>
           ` : ''}
 
           ${sections.alertas.trim() ? `
           <div class="section section-alerts">
-            <div class="section-title">🔔 Alertas pontuais</div>
+            <div class="section-title">Alertas</div>
             ${formatContent(sections.alertas)}
           </div>
           ` : ''}
 
           ${sections.nota.trim() ? `
           <div class="section section-note">
-            <div class="section-title">ℹ Nota metodológica</div>
+            <div class="section-title">Nota Metodológica</div>
             <div>${formatParagraph(sections.nota)}</div>
           </div>
           ` : `
           <div class="section section-note">
-            <div class="section-title">ℹ Nota metodológica</div>
+            <div class="section-title">Nota Metodológica</div>
             <div>Esta síntese baseia-se exclusivamente na análise de padrões recorrentes em opiniões públicas de hóspedes, com o objetivo de apoiar a recomendação profissional e alinhar expectativas do cliente.</div>
           </div>
           `}
@@ -637,17 +760,17 @@
 
       if (isNotFound) {
         errorDiv.innerHTML = `
-          <div class="error-image">🔍🏨❓</div>
-          <div class="error-title">Ups! Hotel não encontrado</div>
+          <div class="error-image">🔍</div>
+          <div class="error-title">Hotel não encontrado</div>
           <div class="error-message">
-            Não conseguimos encontrar esse hotel. Será que escreveste bem o nome?<br>
-            Dica: Tenta incluir a cidade (ex: "Hotel Ritz, Lisboa")
+            Não foi possível encontrar este hotel.<br>
+            Experimente incluir a cidade (ex: "Hotel Ritz, Lisboa")
           </div>
         `;
       } else {
         errorDiv.innerHTML = `
-          <div class="error-image">😵</div>
-          <div class="error-title">Algo correu mal</div>
+          <div class="error-image">⚠️</div>
+          <div class="error-title">Ocorreu um erro</div>
           <div class="error-message">${escapeHtml(message)}</div>
         `;
       }
@@ -669,7 +792,7 @@
       searchedVsFound.style.display = "none";
 
       if (!hotelName) {
-        showError("Por favor, insere o nome do hotel.");
+        showError("Por favor, insira o nome do hotel.");
         return;
       }
 
@@ -679,8 +802,8 @@
       report.innerHTML = `
         <div class="loading">
           <div class="loading-spinner"></div>
-          A recolher e analisar reviews...<br>
-          <small style="color:#999">Isto pode demorar alguns segundos</small>
+          <div class="loading-text">A recolher e analisar reviews</div>
+          <div class="loading-subtext">Isto pode demorar alguns segundos</div>
         </div>
       `;
       report.style.display = "block";
@@ -709,7 +832,7 @@
           const foundClean = foundName.replace(/^hotel\s+/i, '').toLowerCase();
 
           if (!foundClean.includes(searchClean) && !searchClean.includes(foundClean)) {
-            searchedVsFound.innerHTML = `💡 Pesquisaste por "<strong>${escapeHtml(originalSearch)}</strong>" e encontrámos "<strong>${escapeHtml(foundName)}</strong>"`;
+            searchedVsFound.innerHTML = `Pesquisou por "<strong>${escapeHtml(originalSearch)}</strong>" — encontrámos "<strong>${escapeHtml(foundName)}</strong>"`;
             searchedVsFound.style.display = "block";
           }
         }

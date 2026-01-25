@@ -238,7 +238,7 @@ async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict
             url = "https://api.app.outscraper.com/maps/reviews-v3"
             params = {
                 "query": hotel_name,
-                "reviewsLimit": 15,
+                "reviewsLimit": 5,
                 "sort": "newest",
                 "ignoreEmpty": True,
             }
