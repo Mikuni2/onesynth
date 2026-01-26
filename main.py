@@ -215,7 +215,7 @@ async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict
             url = "https://api.app.outscraper.com/maps/reviews-v3"
             params = {
                 "query": hotel_name,
-                "reviewsLimit": 5,
+                "reviewsLimit": 2,
                 "sort": "newest",
                 "ignoreEmpty": True,
             }
@@ -264,7 +264,7 @@ async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict
             # Filtrar reviews com texto substancial
             reviews_with_text = [
                 rv for rv in reviews_list
-                if rv.get("review_text") and len(rv.get("review_text", "").strip()) > 50
+                if rv.get("review_text") and len(rv.get("review_text", "").strip()) > 150
             ]
 
             # Ordenar por tamanho do texto (mais detalhadas primeiro)
@@ -312,7 +312,7 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
     google_data = await fetch_reviews_google_places(hotel)
     outscraper_reviews = await fetch_reviews_outscraper(hotel, limit=2)
 
-    # Combinar reviews: 5 do Google Places + 5 do Outscraper
+    # Combinar reviews: 5 do Google Places + 2 do Outscraper
     reviews_text = ""
     review_count = 0
 
@@ -327,7 +327,7 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
                 f"{text}\n\n"
             )
 
-    # Outscraper reviews (até 5)
+    # Outscraper reviews (até 2)
     for rv in outscraper_reviews:
         text = (rv.get("text") or "").strip()
         if text:
