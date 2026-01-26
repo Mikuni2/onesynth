@@ -511,7 +511,7 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <img src="Logo.png" alt="OneSynth" class="hero-logo" onerror="this.style.display='none'" />
-      <p class="hero-tagline">Apoio profissional à recomendação hoteleira</p>
+      <p class="hero-tagline">Síntese profissional de Reviews - Apoio à Recomendação Hoteleira</p>
     </div>
   </header>
 
@@ -681,7 +681,6 @@
               <div class="hotel-name">${escapeHtml(hotelName)}</div>
               <div class="hotel-location">📍 ${escapeHtml(location)}</div>
               <div class="hotel-meta">
-                ${googleRating ? `<span>⭐ ${googleRating}/5 Google</span>` : ''}
               </div>
             </div>
           </div>
@@ -732,7 +731,7 @@
           ${sections.alertas.trim() ? `
           <div class="section section-alerts">
             <div class="section-title">Alertas</div>
-            ${formatContent(sections.alertas)}
+            ${formatContent(sections.alertas.replace(/Esta síntese baseia-se exclusivamente na análise de padrões recorrentes em opiniões públicas de hóspedes, com o objetivo de apoiar a recomendação profissional e alinhar expectativas do cliente\.?/gi, '').trim())}
           </div>
           ` : ''}
 

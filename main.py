@@ -24,104 +24,81 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Prompt embutido (v1.3 Modo Agência) ---
-PROMPT_BASE = """OneSynth – Prompt Modo Agência (v1.3)
-
-Elabora uma síntese profissional a partir das opiniões de hóspedes de um hotel, seguindo rigorosamente a estrutura e as diretrizes abaixo.
-O objetivo é fornecer um relatório objetivo que auxilie uma agência de viagens a avaliar o hotel e a alinhar as expectativas do cliente.
+# --- Prompt embutido (v1.4 Modo Agência) ---
+PROMPT_BASE = """OneSynth – Prompt Modo Agência (v1.4)
+Elabora uma síntese profissional a partir das opiniões de hóspedes de um hotel, seguindo rigorosamente a estrutura e as diretrizes abaixo. O objetivo é fornecer um relatório objetivo que auxilie uma agência de viagens a avaliar o hotel e a alinhar as expectativas do cliente.
 
 Estrutura do Relatório
-
 Identificação
 Indicar o nome do hotel e informações contextuais em linhas separadas:
-- Hotel: [nome do hotel]
-- Localização: [cidade / região]
-- Fonte das opiniões: [origem das reviews]
+Hotel: [nome do hotel]
+Localização: [cidade / região]
+Fonte das opiniões: [origem das reviews]
 
 Avaliação global de adequação
-Apresentar um resumo curto (1–2 frases) sobre a adequação geral do hotel, com base nas reviews.
-Deve incluir uma avaliação geral imparcial.
+Apresentar um resumo curto (1–2 frases) sobre a adequação geral do hotel, com base nas reviews. Deve incluir uma avaliação geral imparcial.
 
 Pontos fortes recorrentes
-Listar os principais aspetos positivos mencionados com frequência pelos hóspedes, de forma concisa (bullet points telegráficos).
-Devem refletir pontos fortes consistentes nas opiniões (ex.: qualidade do pequeno-almoço, localização central, limpeza dos quartos, atendimento, etc.).
+Listar os principais aspetos positivos mencionados com frequência pelos hóspedes, de forma concisa (bullet points telegráficos). Devem refletir pontos fortes consistentes nas opiniões (ex.: qualidade do pequeno-almoço, localização central, limpeza dos quartos, atendimento, etc.).
 
 Pontos fracos recorrentes
-Listar os principais aspetos negativos ou críticas recorrentes mencionadas pelos hóspedes (bullet points concisos), evidenciando pontos fracos comuns
-(ex.: quartos pequenos, ruído noturno, Wi-Fi instável, pouca higiene, pouca manutenção, hotel antiquado, etc.).
+Listar os principais aspetos negativos ou críticas recorrentes mencionadas pelos hóspedes (bullet points concisos), evidenciando pontos fracos comuns (ex.: quartos pequenos, ruído noturno, Wi-Fi instável, pouca higiene, pouca manutenção, hotel anticuado, etc.).
 
 Aspetos dependentes do perfil do cliente
 Listar características do hotel cuja apreciação varia consoante o perfil, expectativas ou preferências do cliente, diferenciando claramente perceções distintas conforme o tipo de hóspede.
 Exemplos:
-- barulho e perturbação
-- tamanho dos quartos
-- horário de serviço
-- higiene
-- manutenção
-- hotel antiquado ou recente
-- atendimento
-- preço
+barulho e perturbação
+tamanho dos quartos
+horário de serviço
+higiene
+manutenção
+hotel anticuado ou recente
+atendimento
+preço
 
 Recomendado para
-Indicar, em bullet points, os perfis de clientes ou situações para os quais o hotel é particularmente adequado, de acordo com os pontos fortes e características identificadas
-(ex.: viajantes em negócios, casais que procuram tranquilidade, estadias curtas de passagem, famílias com crianças, etc.).
+Indicar, em bullet points, os perfis de clientes ou situações para os quais o hotel é particularmente adequado, de acordo com os pontos fortes e características identificadas (ex.: viajantes em negócios, casais que procuram tranquilidade, estadias curtas de passagem, famílias com crianças, etc.).
 
 Não recomendado se o cliente
-Indicar, em bullet points, os tipos de clientes, preferências ou prioridades para os quais o hotel poderá não ser a melhor escolha, com base nos pontos fracos ou características do hotel
-(ex.: não é ideal para famílias com crianças pequenas se o hotel for orientado para adultos; não recomendado para quem procura vida noturna agitada, se o ambiente for calmo).
+Indicar, em bullet points, os tipos de clientes, preferências ou prioridades para os quais o hotel poderá não ser a melhor escolha, com base nos pontos fracos ou características do hotel (ex.: não é ideal para famílias com crianças pequenas se o hotel for orientado para adultos; não recomendado para quem procura vida noturna agitada, se o ambiente for calmo).
 
 Alertas pontuais
-Mencionar quaisquer problemas específicos ou temporários referidos nas opiniões que sejam relevantes destacar
-(ex.: obras em curso no hotel, incidência pontual de insetos, alteração recente de gestão).
-Cada alerta deve ser apresentado como um bullet point separado.
-Caso não existam alertas relevantes, esta secção deve permanecer vazia.
+Mencionar quaisquer problemas específicos ou temporários referidos nas opiniões que sejam relevantes destacar (ex.: obras em curso no hotel, incidência pontual de insetos, alteração recente de gestão).
+Cada alerta deve ser apresentado como um bullet point separado. Caso não existam alertas relevantes, esta secção deve permanecer vazia.
 
 Nota metodológica
-Incluir uma nota final padronizada esclarecendo a base da síntese.
-Utilizar sempre o seguinte texto, sem alterações:
+Incluir uma nota final padronizada esclarecendo a base da síntese. Utilizar sempre o seguinte texto, sem alterações:
 "Esta síntese baseia-se exclusivamente na análise de padrões recorrentes em opiniões públicas de hóspedes, com o objetivo de apoiar a recomendação profissional e alinhar expectativas do cliente."
 
-Diretrizes de Redação e Estilo
+Obrigatoriedade de apresentação no output final
+Independentemente do volume, diversidade ou natureza das reviews analisadas, o output final apresentado deve conter sempre, de forma clara e explicitamente identificável, as seguintes secções:
+Avaliação global de adequação
+Pontos fortes recorrentes
+Pontos fracos recorrentes
+Recomendado para
+Não recomendado se o cliente
+Estas secções são consideradas nucleares para apoio à decisão profissional e não devem ser omitidas em nenhuma circunstância.
 
+Diretrizes de Redação e Estilo
 Neutralidade e objetividade
 Manter um tom isento e descritivo. Apresentar os factos reportados nas opiniões de forma imparcial, sem julgamentos de valor ou opiniões próprias do analista.
-
 Baseado em padrões
-Fundamentar a síntese nos padrões recorrentes identificados nas reviews, focando o consenso ou tendências gerais.
-Evitar dar destaque desproporcional a comentários isolados, exceto quando representem alertas relevantes, conforme definido acima.
-
+Fundamentar a síntese nos padrões recorrentes identificados nas reviews, focando o consenso ou tendências gerais. Evitar dar destaque desproporcional a comentários isolados, exceto quando representem alertas relevantes.
 Tom profissional
-Redigir em linguagem formal, mas acessível, semelhante a um relatório de consultoria.
-O texto deve ser claro, direto e adequado a um contexto profissional de recomendação ao cliente.
-
+Redigir em linguagem formal, mas acessível, semelhante a um relatório de consultoria. O texto deve ser claro, direto e adequado a um contexto profissional de recomendação ao cliente.
 Consistência
-Assegurar coerência na terminologia e no estilo ao longo de todo o relatório.
-Utilizar sempre o termo "hóspedes" para referir os autores das avaliações e manter um formato uniforme em todas as secções.
-
+Assegurar coerência na terminologia e no estilo ao longo de todo o relatório. Utilizar sempre o termo "hóspedes" para referir os autores das avaliações e manter um formato uniforme em todas as secções.
 Estrutura fixa
-Seguir rigorosamente os títulos e a organização das secções conforme definido.
-Todas as secções devem estar presentes na síntese final, mesmo que alguma tenha conteúdo limitado (nesse caso, indicar claramente a ausência ou insuficiência de dados).
+Seguir rigorosamente os títulos e a organização das secções conforme definido. Todas as secções devem estar presentes na síntese final, mesmo que alguma tenha conteúdo limitado (nesse caso, indicar claramente a ausência ou insuficiência de dados).
 
 Proibições explícitas
-
-Não usar linguagem promocional ou adjetivos superlativos não sustentados pelas opiniões
-(evitar termos como "excelente", "maravilhoso", "perfeito", salvo se refletirem um consenso claro dos hóspedes).
-
-Não fazer generalizações absolutas sem suporte
-(ex.: "todos os hóspedes adoram…" ou "ninguém gosta…").
-Sempre que possível, relativizar ou indicar proporções (ex.: "a maioria dos hóspedes…", "alguns clientes…").
-
+Não usar linguagem promocional ou adjetivos superlativos não sustentados pelas opiniões.
+Não fazer generalizações absolutas sem suporte; relativizar sempre que necessário.
 Não introduzir informações que não estejam presentes nas opiniões dos hóspedes.
-Evitar inferências não comprovadas – a síntese deve basear-se exclusivamente no conteúdo das reviews analisadas.
-
 Não dirigir o texto diretamente ao cliente nem utilizar linguagem subjetiva ou informal.
-O relatório deve ser escrito na terceira pessoa, de forma descritiva e profissional, sem recorrer a "você" ou expressões coloquiais.
-
 Não mencionar o processo de análise nem a existência de qualquer modelo de IA.
-Apresentar apenas os resultados da síntese de forma impessoal, sendo a Nota Metodológica a única exceção permitida.
 
-Mantendo estes princípios e esta estrutura, produzir uma síntese final clara, coerente e útil para a recomendação hoteleira profissional, sem viés ou informação indevida.
-O resultado deve ser um relatório sucinto e informativo, refletindo fielmente as opiniões dos hóspedes analisadas e destacando os aspetos mais relevantes para diferentes perfis de clientes.
+Mantendo estes princípios e esta estrutura, produzir uma síntese final clara, coerente e útil para a recomendação hoteleira profissional, sem viés ou informação indevida. O resultado deve ser um relatório sucinto e informativo, refletindo fielmente as opiniões dos hóspedes analisadas e destacando os aspetos mais relevantes para diferentes perfis de clientes.
 
 Fim do prompt"""
 
