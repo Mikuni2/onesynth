@@ -805,6 +805,26 @@
       errorDiv.style.display = "block";
     }
 
+    function setLoadingMsg(text, subtext) {
+      document.getElementById("report").innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">${text}</div>
+          <div class="loading-subtext">${subtext}</div>
+        </div>`;
+    }
+
+    async function wakeUpServer() {
+      try { await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(8000) }); } catch(_) {}
+    }
+
+    async function fetchWithTimeout(url, options, ms = 120000) {
+      const ctrl = new AbortController();
+      const id = setTimeout(() => ctrl.abort(), ms);
+      try { return await fetch(url, { ...options, signal: ctrl.signal }); }
+      finally { clearTimeout(id); }
+    }
+
     async function analisar() {
       let hotelName = document.getElementById("hotelName").value.trim();
       const originalSearch = hotelName;
@@ -825,22 +845,21 @@
 
       btn.disabled = true;
       btn.innerText = "A analisar...";
-
-      report.innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-          <div class="loading-text">A recolher e analisar reviews</div>
-          <div class="loading-subtext">Isto pode demorar alguns segundos</div>
-        </div>
-      `;
       report.style.display = "block";
 
+      // Fase 1 — acordar o servidor (Render hiberna após inatividade)
+      setLoadingMsg("A iniciar servidor...", "O servidor pode demorar até 60 s a acordar");
+      await wakeUpServer();
+
+      // Fase 2 — pedido principal
+      setLoadingMsg("A recolher e analisar reviews", "Aguarde, isto pode demorar alguns segundos");
+
       try {
-        const response = await fetch(`${API_BASE}/analyze-apify`, {
+        const response = await fetchWithTimeout(`${API_BASE}/analyze-apify`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ hotel_name: hotelName })
-        });
+        }, 120000);
 
         const data = await response.json().catch(() => ({}));
 
@@ -875,7 +894,10 @@
         report.style.display = "block";
 
       } catch (err) {
-        showError(err.message);
+        const msg = err.name === "AbortError"
+          ? "O pedido demorou demasiado. Tenta novamente em alguns segundos."
+          : err.message;
+        showError(msg);
         report.style.display = "none";
       } finally {
         btn.disabled = false;
