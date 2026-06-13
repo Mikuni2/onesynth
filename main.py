@@ -307,7 +307,7 @@ def analyze_with_claude(reviews_text: str) -> str:
     content = PROMPT_BASE + "\n\nREVIEWS:\n" + reviews_text
 
     msg = anthropic_client.messages.create(
-        model="claude-3-haiku-20240307",
+        model="claude-haiku-4-5-20251001",
         max_tokens=2000,
         messages=[{"role": "user", "content": content}],
     )
