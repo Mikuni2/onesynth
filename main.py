@@ -15,10 +15,10 @@ load_dotenv()
 
 app = FastAPI()
 
-# --- CORS (permitir TODOS os domínios - TEMPORÁRIO PARA TESTE) ---
+# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TEMPORÁRIO: permite tudo para testar
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -128,55 +128,79 @@ async def fetch_reviews_google_places(hotel_name: str) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail="GOOGLE_PLACES_API_KEY em falta no servidor")
 
     async with httpx.AsyncClient(timeout=30.0) as client:
-        search_url = "https://maps.googleapis.com/maps/api/place/textsearch/json"
-        search_params = {
-            "query": hotel_name,
-            "type": "lodging",
-            "key": GOOGLE_PLACES_API_KEY,
+
+        # ── 1. Text Search — Places API (New) ────────────────────────────────
+        search_url = "https://places.googleapis.com/v1/places:searchText"
+        search_headers = {
+            "Content-Type": "application/json",
+            "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
+            "X-Goog-FieldMask": (
+                "places.id,places.displayName,places.formattedAddress,"
+                "places.rating,places.userRatingCount,places.photos"
+            ),
+        }
+        search_body = {
+            "textQuery": hotel_name,
+            "includedType": "lodging",
+            "languageCode": "pt",
         }
 
-        r = await client.get(search_url, params=search_params)
+        r = await client.post(search_url, headers=search_headers, json=search_body)
         r.raise_for_status()
         data = r.json()
 
-        results: List[Dict[str, Any]] = data.get("results") or []
-        if not results:
+        places: List[Dict[str, Any]] = data.get("places") or []
+        if not places:
             raise HTTPException(status_code=404, detail="Hotel não encontrado (Google Places)")
 
-        first_result = results[0]
-        place_id = first_result.get("place_id")
+        place = places[0]
+        place_id = place.get("id")
         if not place_id:
             raise HTTPException(status_code=404, detail="Hotel sem place_id (Google Places)")
 
-        # Guardar nome e endereço do hotel encontrado
-        found_hotel_name = first_result.get("name", "")
-        formatted_address = first_result.get("formatted_address", "")
+        found_hotel_name = (place.get("displayName") or {}).get("text", "")
+        formatted_address = place.get("formattedAddress", "")
+        google_rating = place.get("rating")
+        user_ratings_total = place.get("userRatingCount")
 
-        details_url = "https://maps.googleapis.com/maps/api/place/details/json"
-        details_params = {
-            "place_id": place_id,
-            "fields": "reviews,rating,user_ratings_total,photos,name,formatted_address",
-            "key": GOOGLE_PLACES_API_KEY,
+        # ── 2. Place Details — buscar reviews ────────────────────────────────
+        details_url = f"https://places.googleapis.com/v1/places/{place_id}"
+        details_headers = {
+            "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
+            "X-Goog-FieldMask": (
+                "reviews,photos,displayName,formattedAddress,rating,userRatingCount"
+            ),
         }
+        params = {"languageCode": "pt"}
 
-        r = await client.get(details_url, params=details_params)
+        r = await client.get(details_url, headers=details_headers, params=params)
         r.raise_for_status()
         details = r.json()
 
-        result = details.get("result") or {}
-        reviews = result.get("reviews") or []
+        reviews_raw = details.get("reviews") or []
 
-        if not reviews:
+        if not reviews_raw:
             raise HTTPException(status_code=404, detail="Sem reviews (Google Places)")
 
-        # Obter foto do hotel e converter para base64
+        # Normalizar para formato interno
+        reviews = []
+        for rv in reviews_raw:
+            text = (rv.get("text") or {}).get("text", "").strip()
+            rating = rv.get("rating", 0)
+            author = (rv.get("authorAttribution") or {}).get("displayName", "Anónimo")
+            reviews.append({"text": text, "rating": rating, "author_name": author})
+
+        # ── 3. Foto do hotel ──────────────────────────────────────────────────
         photo_url = None
-        photos = result.get("photos") or []
+        photos = details.get("photos") or place.get("photos") or []
         if photos:
-            photo_reference = photos[0].get("photo_reference")
-            if photo_reference:
+            photo_name = photos[0].get("name")
+            if photo_name:
                 try:
-                    photo_api_url = f"https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference={photo_reference}&key={GOOGLE_PLACES_API_KEY}"
+                    photo_api_url = (
+                        f"https://places.googleapis.com/v1/{photo_name}/media"
+                        f"?maxWidthPx=400&key={GOOGLE_PLACES_API_KEY}"
+                    )
                     photo_response = await client.get(photo_api_url, follow_redirects=True)
                     if photo_response.status_code == 200:
                         content_type = photo_response.headers.get("content-type", "image/jpeg")
@@ -185,17 +209,16 @@ async def fetch_reviews_google_places(hotel_name: str) -> Dict[str, Any]:
                 except Exception:
                     pass
 
-        # Usar nome/endereço dos detalhes se disponível
-        if result.get("name"):
-            found_hotel_name = result.get("name")
-        if result.get("formatted_address"):
-            formatted_address = result.get("formatted_address")
+        if details.get("displayName"):
+            found_hotel_name = (details["displayName"] or {}).get("text", found_hotel_name)
+        if details.get("formattedAddress"):
+            formatted_address = details["formattedAddress"]
 
         return {
             "reviews": reviews,
-            "reviews_with_text_count": len([rv for rv in reviews if (rv.get("text") or "").strip()]),
-            "rating": result.get("rating"),
-            "reviews_count": result.get("user_ratings_total"),
+            "reviews_with_text_count": len([rv for rv in reviews if rv.get("text", "").strip()]),
+            "rating": details.get("rating") or google_rating,
+            "reviews_count": details.get("userRatingCount") or user_ratings_total,
             "found_hotel_name": found_hotel_name,
             "formatted_address": formatted_address,
             "photo_url": photo_url,
@@ -203,10 +226,6 @@ async def fetch_reviews_google_places(hotel_name: str) -> Dict[str, Any]:
 
 
 async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict[str, Any]]:
-    """
-    Busca reviews do Outscraper - mais recentes e com texto detalhado.
-    Usa polling para aguardar resultados assíncronos.
-    """
     if not OUTSCRAPER_API_KEY:
         return []
 
@@ -223,19 +242,16 @@ async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict
                 "X-API-KEY": OUTSCRAPER_API_KEY,
             }
 
-            # Fazer request inicial
             response = await client.get(url, params=params, headers=headers)
 
-            # Se retornar 202, precisamos fazer polling
             if response.status_code == 202:
                 data = response.json()
                 results_url = data.get("results_location")
                 if not results_url:
                     return []
 
-                # Polling - aguardar até 60 segundos
                 import asyncio
-                for _ in range(12):  # 12 tentativas x 5 segundos = 60 seg
+                for _ in range(12):
                     await asyncio.sleep(5)
                     poll_response = await client.get(results_url, headers=headers)
                     if poll_response.status_code == 200:
@@ -244,14 +260,13 @@ async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict
                             data = poll_data
                             break
                 else:
-                    return []  # Timeout
+                    return []
             elif response.status_code == 200:
                 data = response.json()
             else:
                 print(f"Outscraper erro: {response.status_code} - {response.text[:200]}")
                 return []
 
-            # Processar resultados
             if not data.get("data") or len(data["data"]) == 0:
                 return []
 
@@ -261,16 +276,13 @@ async def fetch_reviews_outscraper(hotel_name: str, limit: int = 5) -> List[Dict
 
             reviews_list = place_data.get("reviews_data") or []
 
-            # Filtrar reviews com texto substancial
             reviews_with_text = [
                 rv for rv in reviews_list
                 if rv.get("review_text") and len(rv.get("review_text", "").strip()) > 150
             ]
 
-            # Ordenar por tamanho do texto (mais detalhadas primeiro)
             reviews_with_text.sort(key=lambda x: len(x.get("review_text", "")), reverse=True)
 
-            # Converter para formato padronizado
             formatted_reviews = []
             for rv in reviews_with_text[:limit]:
                 formatted_reviews.append({
@@ -308,15 +320,12 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
     if not hotel:
         raise HTTPException(status_code=400, detail="Nome do hotel vazio")
 
-    # Buscar reviews de ambas as fontes em paralelo
     google_data = await fetch_reviews_google_places(hotel)
     outscraper_reviews = await fetch_reviews_outscraper(hotel, limit=2)
 
-    # Combinar reviews: 5 do Google Places + 2 do Outscraper
     reviews_text = ""
     review_count = 0
 
-    # Google Places reviews (até 5)
     google_reviews = google_data["reviews"][:5]
     for rv in google_reviews:
         text = (rv.get("text") or "").strip()
@@ -327,7 +336,6 @@ async def analyze_apify(request: ApifyAnalyzeRequest):
                 f"{text}\n\n"
             )
 
-    # Outscraper reviews (até 2)
     for rv in outscraper_reviews:
         text = (rv.get("text") or "").strip()
         if text:
